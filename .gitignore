@@ -1,0 +1,15 @@
+# Ignorar datos pesados
+data/
+
+# Ignorar archivos del sistema  y caché
+__pycache__/
+*.ipynb_checkpoints
+.DS_Store
+
+# Ignorar entornos virtuales
+venv/
+env/
+
+# Seguridad
+.env
+telegram_config.py
