@@ -200,6 +200,10 @@ if csv_file is not None:
             batch_df['Potability_Prediction'] = np.where(predictions == 1, 'POTABLE', 'NO POTABLE')
             
             st.success("Análisis por lotes completado.")
+            
+            st.subheader("Preview de Resultados")
+            st.dataframe(batch_df)
+
             st.download_button(
                 label="Descargar Resultados como CSV",
                 data=batch_df.to_csv(index=False).encode('utf-8'),
