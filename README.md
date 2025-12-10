@@ -62,18 +62,12 @@ La solución incluye un **dashboard interactivo desarrollado en Streamlit** que 
    TELEGRAM_TOKEN=tu_token_aqui
    ```
 
-5. **Iniciar el Bot de Telegram (para registro de usuarios):**
-   En una terminal separada, ejecuta el script del bot para que pueda escuchar el comando `/start`:
-   ```bash
-   python src/telegram_bot.py
-   ```
-
-6. **Ejecutar la aplicación web:**
-   En otra terminal, lanza el dashboard:
+5. **Ejecutar la aplicación web:**
+   Al iniciar la aplicación, el **Bot de Telegram se iniciará automáticamente** en segundo plano.
    ```bash
    streamlit run app.py
    ```
-   La aplicación se abrirá automáticamente en tu navegador.
+   La aplicación se abrirá en tu navegador y verás en la terminal el mensaje: `🤖 Bot de Alertas ESCUCHANDO...`
 
 ---
 

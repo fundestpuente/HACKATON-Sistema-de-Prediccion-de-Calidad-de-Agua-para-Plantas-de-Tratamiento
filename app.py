@@ -194,7 +194,7 @@ input_df = user_input_features()
 st.sidebar.markdown('---')
 with st.sidebar.expander("🔔 Conectar Alertas", expanded=True):
     # Enlace directo a tu bot
-    bot_name = "TU_BOT_NAME_AQUI" # Pon el nombre real de tu bot sin @
+    bot_name = "AquaAlert_ec_Bot" # Pon el nombre real de tu bot sin @
     st.markdown(f"1. [Abrir Bot en Telegram](https://t.me/{bot_name}) y dar **/start**")
     
     if st.button("🔄 Sincronizar con Bot"):
