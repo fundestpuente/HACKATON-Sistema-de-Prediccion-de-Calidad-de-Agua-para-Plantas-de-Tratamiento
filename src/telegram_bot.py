@@ -83,5 +83,4 @@ def run_listener():
 # PUNTO DE ENTRADA PRINCIPAL
 # ==========================================
 if __name__ == "__main__":
-    # Si ejecutamos este archivo directamente, corre el bot
     run_listener()

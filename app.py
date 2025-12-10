@@ -1,4 +1,5 @@
 import streamlit as st
+import threading
 import pandas as pd
 import joblib
 import numpy as np
@@ -9,7 +10,22 @@ import os
 
 # Añadir src al path para poder importar
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
-from src.telegram_bot import send_telegram_alert
+from src.telegram_bot import send_telegram_alert, run_listener
+
+@st.cache_resource
+def iniciar_bot_en_background():
+    """
+    Esta función crea un hilo secundario para correr el bot.
+    Al usar @st.cache_resource, Streamlit asegura que esto solo se ejecute
+    UNA vez al arrancar la app, evitando duplicar bots.
+    """
+    # Creamos el hilo apuntando a la función run_listener
+    bot_thread = threading.Thread(target=run_listener, daemon=True)
+    bot_thread.start()
+    return bot_thread
+
+# Llamamos a la función inmediatamente
+iniciar_bot_en_background()
 
 # Configuración inicial
 st.set_page_config(
