@@ -82,27 +82,6 @@ La solución incluye un **dashboard interactivo desarrollado en Streamlit** que 
 
 ---
 
-## 📸 Capturas de Pantalla
-
-A continuación se muestra el funcionamiento del sistema:
-
-### 1. Dashboard Principal
-Vista general con los controles de parámetros y visualización de datos.
-![Dashboard Principal](https://via.placeholder.com/800x400?text=Dashboard+Principal+Streamlit)
-*(Reemplaza este link con tu captura: `assets/dashboard_main.png`)*
-
-### 2. Predicción y Resultados
-Visualización clara de la potabilidad y gráficos de radar comparativos.
-![Resultados de Predicción](https://via.placeholder.com/800x400?text=Resultados+Prediccion)
-*(Reemplaza este link con tu captura: `assets/prediction_result.png`)*
-
-### 3. Alertas en Telegram
-Notificación en tiempo real recibida en el dispositivo móvil.
-![Alerta Telegram](https://via.placeholder.com/400x600?text=Alerta+Telegram)
-*(Reemplaza este link con tu captura: `assets/telegram_alert.jpg`)*
-
----
-
 ## 📂 Estructura del Código
 ```
 SIC25-Sistema-de-Prediccion-de-Calidad-de-Agua-para-Plantas-de-Tratamiento/
