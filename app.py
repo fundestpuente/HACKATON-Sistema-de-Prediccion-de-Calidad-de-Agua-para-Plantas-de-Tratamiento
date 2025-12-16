@@ -9,6 +9,8 @@ import sys
 import os
 import datetime
 
+
+
 # Añadir src al path para poder importar
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from src.telegram_bot import send_telegram_alert, run_listener
@@ -796,3 +798,4 @@ elif selection == "Análisis de Imágenes":
 elif selection == "Asistente de IA":
     tab_chatbot()
 
+create_chatbot_widget()
