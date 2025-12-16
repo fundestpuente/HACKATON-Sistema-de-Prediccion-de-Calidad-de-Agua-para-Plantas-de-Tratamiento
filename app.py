@@ -150,6 +150,70 @@ st.markdown("""
         background-color: var(--accent) !important;
         box-shadow: 0 4px 12px rgba(12, 103, 163, 0.2);
     }
+
+    
+
+    /* Ocultar menú de Streamlit y footer */
+    /*
+    [data-testid="stToolbar"] {
+        visibility: hidden;
+    }
+    footer {
+        visibility: hidden;
+    }
+    */
+
+    /* --- NAVEGACIÓN SIDEBAR CON ICONOS --- */
+    
+    /* Ajuste del texto para alinear con el icono */
+    section[data-testid="stSidebar"] div[role="radiogroup"] label p {
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem; /* Espacio entre icono y texto */
+    }
+
+    /* INYECCIÓN DE ICONOS MATERIAL SYMBOLS */
+    
+    /* 1. Dashboard General */
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(1) p::before {
+        content: "dashboard";
+        font-family: 'Material Symbols Outlined';
+        font-size: 20px;
+        font-weight: normal;
+        font-variation-settings: 'FILL' 0;
+    }
+    /* Relleno cuando está activo */
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(1):has(input:checked) p::before {
+        font-variation-settings: 'FILL' 1;
+        color: var(--primary);
+    }
+    
+    /* 2. Visión por Computadora */
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(2) p::before {
+        content: "image_search";
+        font-family: 'Material Symbols Outlined';
+        font-size: 20px;
+        font-weight: normal;
+        font-variation-settings: 'FILL' 0;
+    }
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(2):has(input:checked) p::before {
+        font-variation-settings: 'FILL' 1;
+        color: var(--primary);
+    }
+    
+    /* 3. AI Assistant */
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3) p::before {
+        content: "smart_toy";
+        font-family: 'Material Symbols Outlined';
+        font-size: 20px;
+        font-weight: normal;
+        font-variation-settings: 'FILL' 0;
+    }
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3):has(input:checked) p::before {
+        font-variation-settings: 'FILL' 1;
+        color: var(--primary);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -182,267 +246,291 @@ FEATURES_IMPORTANCE_ORDER = [
 
 # Sidebar con iconos Material Symbols
 st.sidebar.markdown("""
-<div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
-    <div style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background-color: rgba(12, 103, 163, 0.1); border-radius: 0.5rem; color: var(--primary);">
-        <span class="material-symbols-outlined" style="font-size: 24px;">water_drop</span>
+<div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background-color: #dbeafe; border-radius: 50%; color: #0369a1;">
+        <span class="material-symbols-outlined" style="font-size: 28px; font-variation-settings: 'FILL' 1;">water_drop</span>
     </div>
     <div>
-        <h1 style="margin: 0; font-size: 1.125rem; font-weight: bold; color: var(--text-primary);">SIPCA</h1>
-        <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary);">Predicción de la potabilidad del agua</p>
+        <h1 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a; line-height: 1.2; font-family: 'Space Grotesk', sans-serif;">SIPCA</h1>
+        <p style="margin: 0; font-size: 0.875rem; color: #64748b; font-weight: 500;">Predicción de potabilidad</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
 st.sidebar.markdown('---')
 
-# Definir los sliders con valores realistas o promedio
-def user_input_features():
-    """Función para capturar los inputs del usuario a través de sliders"""
-    st.sidebar.markdown('### Parámetros de la Muestra')
-    
-    # Agrupar parámetros para ahorrar espacio
-    with st.sidebar.expander("Parámetros Básicos", expanded=True):
-        ph = st.slider('pH', 0.0, 14.0, 7.0, 0.1)
-        hardness = st.slider('Dureza (mg/L)', 50.0, 350.0, 196.0, 1.0)
-        solids = st.slider('Sólidos (ppm)', 300.0, 60000.0, 22000.0, 100.0)
-        chloramines = st.slider('Cloraminas (ppm)', 0.0, 14.0, 7.1, 0.1)
-
-    with st.sidebar.expander("Parámetros Avanzados", expanded=False):
-        sulfate = st.slider('Sulfato (mg/L)', 100.0, 500.0, 333.0, 1.0)
-        conductivity = st.slider('Conductividad (µS/cm)', 100.0, 800.0, 420.0, 1.0)
-        organic_carbon = st.slider('Carbono Orgánico (ppm)', 0.0, 30.0, 14.5, 0.1)
-        trihalomethanes = st.slider('Trihalometanos', 0.0, 125.0, 66.0, 0.1)
-        turbidity = st.slider('Turbidez', 1.0, 7.0, 3.9, 0.1)
-
-    data = {
-        'ph': ph,
-        'Hardness': hardness,
-        'Solids': solids,
-        'Chloramines': chloramines,
-        'Sulfate': sulfate,
-        'Conductivity': conductivity,
-        'Organic_carbon': organic_carbon,
-        'Trihalomethanes': trihalomethanes,
-        'Turbidity': turbidity
-    }
-    
-    return pd.DataFrame([data], index=['Your Sample'])
-
-input_df = user_input_features()
-
+# Navegación
+options = ["Dashboard General", "Análisis de Imágenes", "Asistente de IA"]
+selection = st.sidebar.radio("Navegación", options, label_visibility="collapsed")
 st.sidebar.markdown('---')
-with st.sidebar.expander("🔔 Conectar Alertas", expanded=True):
-    # Enlace directo a tu bot
-    bot_name = "AquaAlert_ec_Bot" # Pon el nombre real de tu bot sin @
-    st.markdown(f"1. [Abrir Bot en Telegram](https://t.me/{bot_name}) y dar **/start**")
-    
-    if st.button("🔄 Sincronizar con Bot"):
-        try:
-            with open("telegram_connection.json", "r") as f:
-                data = json.load(f)
-            
-            # Guardar en sesión
-            st.session_state['tg_id'] = data['chat_id']
-            st.session_state['tg_name'] = data['name']
-            st.success(f"Conectado: {data['name']}")
-        except FileNotFoundError:
-            st.warning("Primero ve a Telegram y usa /start")
-            
-    # Estado actual
-    if 'tg_id' in st.session_state:
-        st.caption(f"✅ Enviando a: {st.session_state['tg_name']}")
-    else:
-        st.caption("🔴 No conectado")
+
+def tab_dashboard():
+    # Definir los sliders con valores realistas o promedio
+    def user_input_features():
+        """Función para capturar los inputs del usuario a través de sliders"""
+        st.sidebar.markdown('### Parámetros de la Muestra')
         
-# Botones de la barra lateral
-# st.sidebar.markdown('---')
-analyze_button = st.sidebar.button("Analizar Muestra", type="primary")
-st.sidebar.button("Restablecer Parámetros", type="secondary")
+        # Agrupar parámetros para ahorrar espacio
+        with st.sidebar.expander("Parámetros Básicos", expanded=True):
+            ph = st.slider('pH', 0.0, 14.0, 7.0, 0.1)
+            hardness = st.slider('Dureza (mg/L)', 50.0, 350.0, 196.0, 1.0)
+            solids = st.slider('Sólidos (ppm)', 300.0, 60000.0, 22000.0, 100.0)
+            chloramines = st.slider('Cloraminas (ppm)', 0.0, 14.0, 7.1, 0.1)
 
-# Área principal
-# st.title("Dashboard")
+        with st.sidebar.expander("Parámetros Avanzados", expanded=False):
+            sulfate = st.slider('Sulfato (mg/L)', 100.0, 500.0, 333.0, 1.0)
+            conductivity = st.slider('Conductividad (µS/cm)', 100.0, 800.0, 420.0, 1.0)
+            organic_carbon = st.slider('Carbono Orgánico (ppm)', 0.0, 30.0, 14.5, 0.1)
+            trihalomethanes = st.slider('Trihalometanos', 0.0, 125.0, 66.0, 0.1)
+            turbidity = st.slider('Turbidez', 1.0, 7.0, 3.9, 0.1)
 
-# Bloque de análisis por lotes con icono Material Symbols
-with st.container(border=True):
-    col_icon, col_text = st.columns([1, 15])
-    with col_icon:
-        st.markdown('<span class="material-symbols-outlined" style="font-size: 32px; color: var(--primary);">csv</span>', unsafe_allow_html=True)
-    with col_text:
-        st.markdown("### Análisis por lotes")
-        st.caption("Sube un archivo CSV para realizar predicciones masivas. (Asegúrate de que las columnas coincidan con las esperadas a la muestra.)")
-    
-    csv_file = st.file_uploader(" ", type=["csv"], label_visibility="collapsed")
-
-if csv_file is not None:
-    batch_df = pd.read_csv(csv_file)
-    st.subheader("Preview de Archivo CSV")
-    st.dataframe(batch_df.head())
-    
-    # Predicción de lotes
-    if st.button("Ejecutar Predicción por Lotes", type="primary"):
-        try:
-            batch_scaled = scaler.transform(batch_df)
-            predictions = model.predict(batch_scaled)
-            batch_df['Potability_Prediction'] = np.where(predictions == 1, 'POTABLE', 'NO POTABLE')
-            
-            st.success("Análisis por lotes completado.")
-            
-            st.subheader("Preview de Resultados")
-            st.dataframe(batch_df)
-
-            st.download_button(
-                label="Descargar Resultados como CSV",
-                data=batch_df.to_csv(index=False).encode('utf-8'),
-                file_name='water_potability_results.csv',
-                mime='text/csv'
-            )
-        except Exception as e:
-            st.error(f"Error al procesar el lote: {e}. Asegurate de que las columnas coinciden con las esperadas.")
-
-# Predicción y resultados
-if analyze_button and model:
-    # Preprocesamiento
-    input_scaled = scaler.transform(input_df)
-    
-    # Predicción
-    prediction = model.predict(input_scaled)[0]
-    proba = model.predict_proba(input_scaled)[0]
-    confidence = proba[prediction] * 100
-    
-    prediction = model.predict(input_scaled)[0]
-    ph_val = input_df['ph'].iloc[0]
-    
-    # === NUEVO: GUARDAR ESTADO PARA EL BOT (/status) ===
-    status_data = {
-        "prediction": "POTABLE" if prediction == 1 else "NO POTABLE",
-        "ph": float(ph_val),
-        "confidence": float(confidence),
-        "timestamp": datetime.datetime.now().strftime("%H:%M:%S")
-    }
-    with open("water_status.json", "w") as f:
-        json.dump(status_data, f)
-    
-    # SISTEMA DE ALERTAS INTEGRADO
-    trigger = False
-    reasons = []
-    
-    # 1. Criterio IA
-    if prediction == 0: # 0 = No Potable
-        trigger = True
-        reasons.append(f"IA detectó riesgo (Confianza: {confidence:.1f}%)")
-        
-    # 2. Criterio Normativo (pH)
-    ph_val = input_df['ph'].iloc[0]
-    if ph_val < 6.5 or ph_val > 8.5:
-        trigger = True
-        reasons.append(f"pH fuera de norma ({ph_val:.1f})")
-
-    # 3. Disparo de Alerta
-    if trigger:
-        # Recuperar ID de la sesión
-        chat_id = st.session_state.get('tg_id')
-        
-        if chat_id:
-            msg = (
-                f"🚨 *ALERTA DE CALIDAD DE AGUA*\n\n"
-                f"**Motivos:** {', '.join(reasons)}\n"
-                f"**Muestra:** pH {ph_val:.1f}"
-            )
-            # Llamamos a la función que importamos de src/telegram_bot.py
-            ok, status = send_telegram_alert(msg, chat_id)
-            
-            if ok:
-                st.toast(f"Alerta enviada a {st.session_state['tg_name']}", icon="📲")
-            else:
-                st.error(f"Fallo Telegram: {status}")
-        else:
-            st.warning("⚠️ Riesgo detectado, pero no has sincronizado el Bot.")
-    
-    # Mostrar resultados con diseño del mockup
-    if prediction == 1:
-        icon_class = "potable"
-        icon_symbol = "check_circle"
-        title_text = "Potable"
-        title_class = "potable"
-    else:
-        icon_class = "no-potable"
-        icon_symbol = "cancel"
-        title_text = "NO Potable"
-        title_class = "no-potable"
-    
-    st.markdown(f"""
-    <div class="result-card">
-        <div class="result-icon {icon_class}">
-            <span class="material-symbols-outlined">{icon_symbol}</span>
-        </div>
-        <h3 class="result-title {title_class}">{title_text}</h3>
-        <p class="result-confidence">{confidence:.1f}% Confidence</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Visualizaciones
-    col_feat_imp, col_radar = st.columns([3, 2])
-    
-    # Gráfico1: Importancia de características
-    with col_feat_imp:
-        st.subheader("Importancia de Características")
-        
-        importance_values = [0.25, 0.19, 0.10, 0.09, 0.085, 0.08, 0.075, 0.07, 0.07]  # Valores ficticios de importancia
-        df_imp = pd.DataFrame({
-            'Característica': FEATURES_IMPORTANCE_ORDER,
-            'Importancia': importance_values
-        }).sort_values(by='Importancia', ascending=True)
-        
-        # Gráfico de barras horizontales con color accent del diseño
-        st.bar_chart(df_imp, x='Importancia', y='Característica', color='#11a4d4', height=400)
-
-    # Gráfico Radar Chart
-    with col_radar:
-        st.subheader("Muestra vs Promedios Seguros")
-        
-        # Valores promedios seguros estimados para la comparación
-        safe_avg_values = {
-                'ph': 7.5, 'Hardness': 180.0, 'Solids': 15000.0, 'Chloramines': 5.0, 
-                'Sulfate': 300.0, 'Conductivity': 500.0, 'Organic_carbon': 10.0, 
-                'Trihalomethanes': 70.0, 'Turbidity': 4.0
+        data = {
+            'ph': ph,
+            'Hardness': hardness,
+            'Solids': solids,
+            'Chloramines': chloramines,
+            'Sulfate': sulfate,
+            'Conductivity': conductivity,
+            'Organic_carbon': organic_carbon,
+            'Trihalomethanes': trihalomethanes,
+            'Turbidity': turbidity
         }
         
-        # Asegurar el orden del sample coincida con el safe_avg
-        sample_values = input_df[list(safe_avg_values.keys())].iloc[0].values.tolist()
-        safe_values = list(safe_avg_values.values())
-        categories = list(safe_avg_values.keys())
+        return pd.DataFrame([data], index=['Your Sample'])
+
+    input_df = user_input_features()
+
+    st.sidebar.markdown('---')
+    with st.sidebar.expander("🔔 Conectar Alertas", expanded=True):
+        # Enlace directo a tu bot
+        bot_name = "AquaAlert_ec_Bot" # Pon el nombre real de tu bot sin @
+        st.markdown(f"1. [Abrir Bot en Telegram](https://t.me/{bot_name}) y dar **/start**")
         
-        # Encontrar el valor máximo para establecer el rango del eje polar
-        max_val = max(max(sample_values), max(safe_values))
+        if st.button("🔄 Sincronizar con Bot"):
+            try:
+                with open("telegram_connection.json", "r") as f:
+                    data = json.load(f)
+                
+                # Guardar en sesión
+                st.session_state['tg_id'] = data['chat_id']
+                st.session_state['tg_name'] = data['name']
+                st.success(f"Conectado: {data['name']}")
+            except FileNotFoundError:
+                st.warning("Primero ve a Telegram y usa /start")
+                
+        # Estado actual
+        if 'tg_id' in st.session_state:
+            st.caption(f"✅ Enviando a: {st.session_state['tg_name']}")
+        else:
+            st.caption("🔴 No conectado")
+            
+    # Botones de la barra lateral
+    # st.sidebar.markdown('---')
+    analyze_button = st.sidebar.button("Analizar Muestra", type="primary", use_container_width=True)
+    st.sidebar.button("Restablecer Parámetros", type="secondary", use_container_width=True)
+
+    # Área principal
+    # st.title("Dashboard")
+
+    # Bloque de análisis por lotes con icono Material Symbols
+    with st.container(border=True):
+        col_icon, col_text = st.columns([1, 15])
+        with col_icon:
+            st.markdown('<span class="material-symbols-outlined" style="font-size: 32px; color: var(--primary);">csv</span>', unsafe_allow_html=True)
+        with col_text:
+            st.markdown("### Análisis por lotes")
+            st.caption("Sube un archivo CSV para realizar predicciones masivas. (Asegúrate de que las columnas coincidan con las esperadas a la muestra.)")
         
-        fig = go.Figure()
+        csv_file = st.file_uploader(" ", type=["csv"], label_visibility="collapsed")
+
+    if csv_file is not None:
+        batch_df = pd.read_csv(csv_file)
+        st.subheader("Preview de Archivo CSV")
+        st.dataframe(batch_df.head())
         
-        fig.add_trace(go.Scatterpolar(
-            r=sample_values,
-            theta=categories,
-            fill='toself',
-            name='Tu Muestra',
-            line_color='#11a4d4',
-            fillcolor='rgba(17, 164, 212, 0.4)'
-        ))
+        # Predicción de lotes
+        if st.button("Ejecutar Predicción por Lotes", type="primary"):
+            try:
+                batch_scaled = scaler.transform(batch_df)
+                predictions = model.predict(batch_scaled)
+                batch_df['Potability_Prediction'] = np.where(predictions == 1, 'POTABLE', 'NO POTABLE')
+                
+                st.success("Análisis por lotes completado.")
+                
+                st.subheader("Preview de Resultados")
+                st.dataframe(batch_df)
+
+                st.download_button(
+                    label="Descargar Resultados como CSV",
+                    data=batch_df.to_csv(index=False).encode('utf-8'),
+                    file_name='water_potability_results.csv',
+                    mime='text/csv'
+                )
+            except Exception as e:
+                st.error(f"Error al procesar el lote: {e}. Asegurate de que las columnas coinciden con las esperadas.")
+
+    # Predicción y resultados
+    if analyze_button and model:
+        # Preprocesamiento
+        input_scaled = scaler.transform(input_df)
         
-        # Promedios seguros 
-        fig.add_trace(go.Scatterpolar(
-            r=safe_values,
-            theta=categories,
-            fill='none',
-            name='Promedios Seguros',
-            line=dict(dash='dot', color='#4ade80')
-        ))
+        # Predicción
+        prediction = model.predict(input_scaled)[0]
+        proba = model.predict_proba(input_scaled)[0]
+        confidence = proba[prediction] * 100
         
-        fig.update_layout(
-            polar=dict(
-                radialaxis=dict(visible=True, range=[0, max_val * 1.1]),
-                angularaxis=dict(tickfont=dict(size=10), direction = "clockwise")
-            ),
-            showlegend=True,
-            legend=dict(orientation="h", y=-0.1, x=0.5, xanchor="center"),
-            height=400,
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-        )
-        st.plotly_chart(fig, width="stretch")
+        prediction = model.predict(input_scaled)[0]
+        ph_val = input_df['ph'].iloc[0]
+        
+        # === NUEVO: GUARDAR ESTADO PARA EL BOT (/status) ===
+        status_data = {
+            "prediction": "POTABLE" if prediction == 1 else "NO POTABLE",
+            "ph": float(ph_val),
+            "confidence": float(confidence),
+            "timestamp": datetime.datetime.now().strftime("%H:%M:%S")
+        }
+        with open("water_status.json", "w") as f:
+            json.dump(status_data, f)
+        
+        # SISTEMA DE ALERTAS INTEGRADO
+        trigger = False
+        reasons = []
+        
+        # 1. Criterio IA
+        if prediction == 0: # 0 = No Potable
+            trigger = True
+            reasons.append(f"IA detectó riesgo (Confianza: {confidence:.1f}%)")
+            
+        # 2. Criterio Normativo (pH)
+        ph_val = input_df['ph'].iloc[0]
+        if ph_val < 6.5 or ph_val > 8.5:
+            trigger = True
+            reasons.append(f"pH fuera de norma ({ph_val:.1f})")
+
+        # 3. Disparo de Alerta
+        if trigger:
+            # Recuperar ID de la sesión
+            chat_id = st.session_state.get('tg_id')
+            
+            if chat_id:
+                msg = (
+                    f"🚨 *ALERTA DE CALIDAD DE AGUA*\n\n"
+                    f"**Motivos:** {', '.join(reasons)}\n"
+                    f"**Muestra:** pH {ph_val:.1f}"
+                )
+                # Llamamos a la función que importamos de src/telegram_bot.py
+                ok, status = send_telegram_alert(msg, chat_id)
+                
+                if ok:
+                    st.toast(f"Alerta enviada a {st.session_state['tg_name']}", icon="📲")
+                else:
+                    st.error(f"Fallo Telegram: {status}")
+            else:
+                st.warning("⚠️ Riesgo detectado, pero no has sincronizado el Bot.")
+        
+        # Mostrar resultados con diseño del mockup
+        if prediction == 1:
+            icon_class = "potable"
+            icon_symbol = "check_circle"
+            title_text = "Potable"
+            title_class = "potable"
+        else:
+            icon_class = "no-potable"
+            icon_symbol = "cancel"
+            title_text = "NO Potable"
+            title_class = "no-potable"
+        
+        st.markdown(f"""
+        <div class="result-card">
+            <div class="result-icon {icon_class}">
+                <span class="material-symbols-outlined">{icon_symbol}</span>
+            </div>
+            <h3 class="result-title {title_class}">{title_text}</h3>
+            <p class="result-confidence">{confidence:.1f}% Confidence</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Visualizaciones
+        col_feat_imp, col_radar = st.columns([3, 2])
+        
+        # Gráfico1: Importancia de características
+        with col_feat_imp:
+            st.subheader("Importancia de Características")
+            
+            importance_values = [0.25, 0.19, 0.10, 0.09, 0.085, 0.08, 0.075, 0.07, 0.07]  # Valores ficticios de importancia
+            df_imp = pd.DataFrame({
+                'Característica': FEATURES_IMPORTANCE_ORDER,
+                'Importancia': importance_values
+            }).sort_values(by='Importancia', ascending=True)
+            
+            # Gráfico de barras horizontales con color accent del diseño
+            st.bar_chart(df_imp, x='Importancia', y='Característica', color='#11a4d4', height=400)
+
+        # Gráfico Radar Chart
+        with col_radar:
+            st.subheader("Muestra vs Promedios Seguros")
+            
+            # Valores promedios seguros estimados para la comparación
+            safe_avg_values = {
+                    'ph': 7.5, 'Hardness': 180.0, 'Solids': 15000.0, 'Chloramines': 5.0, 
+                    'Sulfate': 300.0, 'Conductivity': 500.0, 'Organic_carbon': 10.0, 
+                    'Trihalomethanes': 70.0, 'Turbidity': 4.0
+            }
+            
+            # Asegurar el orden del sample coincida con el safe_avg
+            sample_values = input_df[list(safe_avg_values.keys())].iloc[0].values.tolist()
+            safe_values = list(safe_avg_values.values())
+            categories = list(safe_avg_values.keys())
+            
+            # Encontrar el valor máximo para establecer el rango del eje polar
+            max_val = max(max(sample_values), max(safe_values))
+            
+            fig = go.Figure()
+            
+            fig.add_trace(go.Scatterpolar(
+                r=sample_values,
+                theta=categories,
+                fill='toself',
+                name='Tu Muestra',
+                line_color='#11a4d4',
+                fillcolor='rgba(17, 164, 212, 0.4)'
+            ))
+            
+            # Promedios seguros 
+            fig.add_trace(go.Scatterpolar(
+                r=safe_values,
+                theta=categories,
+                fill='none',
+                name='Promedios Seguros',
+                line=dict(dash='dot', color='#4ade80')
+            ))
+            
+            fig.update_layout(
+                polar=dict(
+                    radialaxis=dict(visible=True, range=[0, max_val * 1.1]),
+                    angularaxis=dict(tickfont=dict(size=10), direction = "clockwise")
+                ),
+                showlegend=True,
+                legend=dict(orientation="h", y=-0.1, x=0.5, xanchor="center"),
+                height=400,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+            )
+            st.plotly_chart(fig, width="stretch")
+
+def tab_vision():
+    st.header("Análisis de Imágenes")
+    st.caption("Sube imágenes de muestras de agua para detección automática de impurezas.")
+    st.info("Módulo en desarrollo. Aquí se implementará la funcionalidad de visión por computadora.")
+
+def tab_chatbot():
+    st.header("Asistente de IA")
+    st.caption("Haz preguntas sobre métricas de calidad del agua o recibe ayuda con el análisis.")
+    st.info("Módulo en desarrollo. Aquí se implementará el chatbot.")
+
+if selection == "Dashboard General":
+    tab_dashboard()
+elif selection == "Análisis de Imágenes":
+    tab_vision()
+elif selection == "Asistente de IA":
+    tab_chatbot()
+
