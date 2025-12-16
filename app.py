@@ -15,6 +15,7 @@ import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from src.telegram_bot import send_telegram_alert, run_listener
 from src.vision_module import analyze_water_turbidity, get_ntu_interpretation
+from src.chatbot_llm import create_chatbot_widget
 
 #@st.cache_resource
 def iniciar_bot_en_background():
