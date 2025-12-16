@@ -12,6 +12,7 @@ import datetime
 # Añadir src al path para poder importar
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from src.telegram_bot import send_telegram_alert, run_listener
+from src.vision_module import analyze_water_turbidity, get_ntu_interpretation
 
 #@st.cache_resource
 def iniciar_bot_en_background():
@@ -519,8 +520,269 @@ def tab_dashboard():
 
 def tab_vision():
     st.header("Análisis de Imágenes")
-    st.caption("Sube imágenes de muestras de agua para detección automática de impurezas.")
-    st.info("Módulo en desarrollo. Aquí se implementará la funcionalidad de visión por computadora.")
+    st.caption("Análisis de turbidez mediante visión por computadora. Sube una imagen de tu muestra de agua.")
+    
+    # Información educativa en un expander
+    with st.expander("ℹ️ ¿Qué es la Turbidez (NTU)?", expanded=False):
+        st.markdown("""
+        La **turbidez** mide la claridad del agua. Se expresa en **NTU** (Unidades Nefelométricas de Turbidez).
+        
+        Partículas suspendidas como arcilla, sedimentos, algas y microorganismos causan turbidez.
+        
+        **Estándares:**
+        - 🌟 **0-1 NTU**: Excelente (agua cristalina)
+        - ✅ **1-5 NTU**: Cumple con OMS (potable)
+        - ⚠️ **5-10 NTU**: Aceptable (visible al ojo)
+        - 🔶 **10-25 NTU**: Deficiente (requiere tratamiento)
+        - 🚫 **>25 NTU**: No potable
+        """)
+    
+    # Layout de dos columnas
+    col_upload, col_info = st.columns([2, 1])
+    
+    with col_upload:
+        # Zona de carga con diseño mejorado
+        with st.container(border=True):
+            st.markdown("""
+            <div style="text-align: center; padding: 1rem 0;">
+                <span class="material-symbols-outlined" style="font-size: 48px; color: var(--primary);">add_photo_alternate</span>
+                <h3 style="margin: 0.5rem 0;">Sube una imagen de agua</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Formatos: JPG, PNG, JPEG</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            uploaded_file = st.file_uploader(
+                "Seleccionar imagen",
+                type=["jpg", "jpeg", "png"],
+                label_visibility="collapsed"
+            )
+    
+    with col_info:
+        # Guía rápida
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%); 
+                    padding: 1.5rem; border-radius: 0.75rem; height: 100%;">
+            <h4 style="margin-top: 0;">📸 Consejos de Fotografía</h4>
+            <ul style="font-size: 0.9rem; line-height: 1.8;">
+                <li>Usa luz natural uniforme</li>
+                <li>Fondo blanco o neutro</li>
+                <li>Recipiente transparente</li>
+                <li>Enfoque nítido</li>
+                <li>Sin reflejos directos</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    if uploaded_file is not None:
+        # Leer los bytes de la imagen
+        image_bytes = uploaded_file.read()
+        
+        # Mostrar imagen subida
+        col_img, col_result = st.columns([1, 1])
+        
+        with col_img:
+            st.subheader("Muestra Analizada")
+            st.image(image_bytes, use_container_width=True, caption=uploaded_file.name)
+        
+        with col_result:
+            st.subheader("Resultados del Análisis")
+            
+            # Botón de análisis
+            if st.button("🔬 Analizar Turbidez", type="primary", use_container_width=True):
+                with st.spinner("Analizando imagen..."):
+                    # Llamar a la función de visión
+                    result = analyze_water_turbidity(image_bytes)
+                    
+                    if result.get('error'):
+                        st.error(result['message'])
+                    else:
+                        # Guardar resultado en session_state
+                        st.session_state['vision_result'] = result
+                        st.rerun()
+        
+        # Mostrar resultados si existen
+        if 'vision_result' in st.session_state:
+            result = st.session_state['vision_result']
+            
+            # Determinar estilo según el estado
+            if result['status'] == 'safe':
+                icon_class = "potable"
+                icon_symbol = "water_drop"
+                border_color = "#22c55e"
+            elif result['status'] == 'acceptable':
+                icon_class = "no-potable"
+                icon_symbol = "opacity"
+                border_color = "#f59e0b"
+            else:
+                icon_class = "no-potable"
+                icon_symbol = "warning"
+                border_color = "#ef4444"
+            
+            st.markdown("---")
+            
+            # Tarjeta de resultado principal
+            st.markdown(f"""
+            <div style="background: rgba(255, 255, 255, 0.6);
+                        border-radius: 1rem;
+                        border: 3px solid {border_color};
+                        padding: 2rem;
+                        text-align: center;
+                        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+                        margin: 2rem 0;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 2rem;">
+                    <div class="result-icon {icon_class}">
+                        <span class="material-symbols-outlined">{icon_symbol}</span>
+                    </div>
+                    <div style="text-align: left;">
+                        <h1 style="margin: 0; font-size: 3rem; font-weight: bold; color: {border_color};">{result['ntu']} NTU</h1>
+                        <h3 style="margin: 0.5rem 0; color: var(--text-primary);">{result['classification']}</h3>
+                        <p style="margin: 0; color: var(--text-secondary);">Confianza: {result['confidence']}%</p>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Recomendación
+            st.info(result['recommendation'])
+            
+            # Indicador de cumplimiento OMS
+            if result['meets_who_standards']:
+                st.success("✅ Cumple con los estándares de la OMS (< 5 NTU)")
+            else:
+                st.warning("⚠️ No cumple con los estándares recomendados de la OMS")
+            
+            # Métricas detalladas en columnas
+            st.markdown("### 📊 Análisis Detallado")
+            metric_cols = st.columns(4)
+            
+            with metric_cols[0]:
+                st.metric(
+                    label="Brillo Promedio",
+                    value=f"{result['color_profile']['brightness']:.1f}",
+                    help="Luminosidad media de la imagen (0-255)"
+                )
+            
+            with metric_cols[1]:
+                st.metric(
+                    label="Saturación",
+                    value=f"{result['color_profile']['saturation']:.1f}",
+                    help="Intensidad de color promedio"
+                )
+            
+            with metric_cols[2]:
+                st.metric(
+                    label="Variabilidad",
+                    value=f"{result['color_profile']['std_dev']:.1f}",
+                    help="Desviación estándar de la imagen"
+                )
+            
+            with metric_cols[3]:
+                st.metric(
+                    label="Índice Amarillo",
+                    value=f"{result['color_profile']['yellow_index']:.1f}",
+                    help="Componente de color amarillo/marrón"
+                )
+            
+            # Gráfico de referencia NTU
+            st.markdown("### 📈 Escala de Referencia NTU")
+            
+            # Crear gráfico de barras horizontal con la escala
+            ntu_ranges = [
+                {'label': 'Excelente\n(0-1)', 'value': 1, 'color': '#22c55e'},
+                {'label': 'Muy Buena\n(1-5)', 'value': 4, 'color': '#84cc16'},
+                {'label': 'Buena\n(5-10)', 'value': 5, 'color': '#eab308'},
+                {'label': 'Aceptable\n(10-25)', 'value': 15, 'color': '#f59e0b'},
+                {'label': 'Deficiente\n(25-50)', 'value': 25, 'color': '#ef4444'},
+                {'label': 'Muy Turbia\n(>50)', 'value': 50, 'color': '#991b1b'}
+            ]
+            
+            fig = go.Figure()
+            
+            # Agregar barras de referencia
+            for i, range_data in enumerate(ntu_ranges):
+                fig.add_trace(go.Bar(
+                    y=[range_data['label']],
+                    x=[range_data['value']],
+                    orientation='h',
+                    marker=dict(color=range_data['color']),
+                    name=range_data['label'],
+                    showlegend=False
+                ))
+            
+            # Agregar marcador de tu muestra
+            y_position = 0
+            for i, range_data in enumerate(ntu_ranges):
+                cumulative = sum(r['value'] for r in ntu_ranges[:i+1])
+                if result['ntu'] <= cumulative:
+                    y_position = i
+                    break
+            
+            fig.add_trace(go.Scatter(
+                x=[result['ntu']],
+                y=[ntu_ranges[y_position]['label']],
+                mode='markers',
+                marker=dict(
+                    size=20,
+                    color='white',
+                    symbol='diamond',
+                    line=dict(color='black', width=2)
+                ),
+                name='Tu Muestra',
+                showlegend=True
+            ))
+            
+            fig.update_layout(
+                barmode='overlay',
+                xaxis_title='NTU',
+                height=400,
+                showlegend=True,
+                legend=dict(x=0.8, y=0.95),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)'
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Botón para nuevo análisis
+            col_btn1, col_btn2 = st.columns(2)
+            with col_btn1:
+                if st.button("🔄 Analizar Nueva Imagen", use_container_width=True):
+                    del st.session_state['vision_result']
+                    st.rerun()
+            
+            with col_btn2:
+                # Exportar resultados
+                result_text = f"""
+=== ANÁLISIS DE TURBIDEZ ===
+Imagen: {uploaded_file.name}
+Fecha: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+RESULTADO:
+Turbidez: {result['ntu']} NTU
+Clasificación: {result['classification']}
+Confianza: {result['confidence']}%
+
+RECOMENDACIÓN:
+{result['recommendation']}
+
+Cumple OMS: {'Sí' if result['meets_who_standards'] else 'No'}
+                """
+                st.download_button(
+                    label="📄 Exportar Reporte",
+                    data=result_text,
+                    file_name=f"turbidity_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                    mime="text/plain",
+                    use_container_width=True
+                )
+    else:
+        # Estado inicial sin imagen
+        st.markdown("""
+        <div style="text-align: center; padding: 4rem 2rem; color: var(--text-secondary);">
+            <span class="material-symbols-outlined" style="font-size: 80px; opacity: 0.3;">image</span>
+            <h3 style="opacity: 0.6;">Esperando imagen...</h3>
+            <p>Sube una imagen para comenzar el análisis de turbidez</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 def tab_chatbot():
     st.header("Asistente de IA")
