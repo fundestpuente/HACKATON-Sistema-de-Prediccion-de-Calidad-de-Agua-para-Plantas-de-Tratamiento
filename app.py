@@ -4,7 +4,7 @@ import pandas as pd
 import joblib
 import numpy as np
 import plotly.graph_objects as go
-import json # <--- AGREGAR ESTO
+import json 
 import sys
 import os
 
@@ -12,7 +12,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from src.telegram_bot import send_telegram_alert, run_listener
 
-@st.cache_resource
+#@st.cache_resource
 def iniciar_bot_en_background():
     """
     Esta función crea un hilo secundario para correr el bot.
@@ -25,7 +25,7 @@ def iniciar_bot_en_background():
     return bot_thread
 
 # Llamamos a la función inmediatamente
-iniciar_bot_en_background()
+# iniciar_bot_en_background()
 
 # Configuración inicial
 st.set_page_config(
@@ -40,13 +40,12 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
     
-    /* Variables de color del diseño */
     :root {
-        --primary: #0c67a3;
+        --primary: var(--primary-color, #0c67a3);
         --accent: #11a4d4;
-        --background: #f0f4f8;
-        --card: #ffffff;
-        --text-primary: #101d22;
+        --background: var(--background-color, #f0f4f8);
+        --card: var(--secondary-background-color, #ffffff);
+        --text-primary: var(--text-color, #101d22);
         --text-secondary: #5a6e79;
         --border-color: #e2e8f0;
     }
@@ -112,6 +111,44 @@ st.markdown("""
         color: var(--text-secondary);
         font-size: 1.125rem;
     }
+
+    /* Sliders: Thumb (círculo) blanco con borde azul */
+    div[data-baseweb="slider"] div[role="slider"] {
+        background-color: #ffffff !important;
+        border: 2px solid var(--primary) !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        height: 18px !important; 
+        width: 18px !important;
+    }
+    
+    /* Sliders: Track Fill (Barra rellena) - Forzar color */
+    div[data-baseweb="slider"] > div > div > div > div {
+        background-color: var(--primary) !important;
+    }
+    
+    /* Botón Secundario (Reset): Fondo gris claro */
+    button[kind="secondary"] {
+        background-color: #f1f5f9 !important;
+        border: 1px solid transparent !important;
+        color: var(--text-secondary) !important;
+        transition: all 0.2s;
+    }
+    button[kind="secondary"]:hover {
+        background-color: #e2e8f0 !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Botón Primario (Analizar): Azul con hover */
+    button[kind="primary"] {
+        background-color: var(--primary) !important;
+        border: none !important;
+        color: white !important;
+        transition: all 0.2s;
+    }
+    button[kind="primary"]:hover {
+        background-color: var(--accent) !important;
+        box-shadow: 0 4px 12px rgba(12, 103, 163, 0.2);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -145,7 +182,7 @@ FEATURES_IMPORTANCE_ORDER = [
 # Sidebar con iconos Material Symbols
 st.sidebar.markdown("""
 <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
-    <div style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background-color: rgba(12, 103, 163, 0.1); border-radius: 0.5rem; color: #0c67a3;">
+    <div style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background-color: rgba(12, 103, 163, 0.1); border-radius: 0.5rem; color: var(--primary);">
         <span class="material-symbols-outlined" style="font-size: 24px;">water_drop</span>
     </div>
     <div>
@@ -227,7 +264,7 @@ st.sidebar.button("Restablecer Parámetros", type="secondary")
 with st.container(border=True):
     col_icon, col_text = st.columns([1, 15])
     with col_icon:
-        st.markdown('<span class="material-symbols-outlined" style="font-size: 32px; color: #0c67a3;">csv</span>', unsafe_allow_html=True)
+        st.markdown('<span class="material-symbols-outlined" style="font-size: 32px; color: var(--primary);">csv</span>', unsafe_allow_html=True)
     with col_text:
         st.markdown("### Análisis por lotes")
         st.caption("Sube un archivo CSV para realizar predicciones masivas. (Asegúrate de que las columnas coincidan con las esperadas a la muestra.)")
