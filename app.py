@@ -4,7 +4,7 @@ import pandas as pd
 import joblib
 import numpy as np
 import plotly.graph_objects as go
-import json 
+import json # <--- AGREGAR ESTO
 import sys
 import os
 
@@ -307,7 +307,20 @@ if analyze_button and model:
     proba = model.predict_proba(input_scaled)[0]
     confidence = proba[prediction] * 100
     
-    # --- SISTEMA DE ALERTAS INTEGRADO ---
+    prediction = model.predict(input_scaled)[0]
+    ph_val = input_df['ph'].iloc[0]
+    
+    # === NUEVO: GUARDAR ESTADO PARA EL BOT (/status) ===
+    status_data = {
+        "prediction": "POTABLE" if prediction == 1 else "NO POTABLE",
+        "ph": float(ph_val),
+        "confidence": float(confidence),
+        "timestamp": datetime.datetime.now().strftime("%H:%M:%S")
+    }
+    with open("water_status.json", "w") as f:
+        json.dump(status_data, f)
+    
+    # SISTEMA DE ALERTAS INTEGRADO
     trigger = False
     reasons = []
     

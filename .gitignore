@@ -12,5 +12,6 @@ env/
 
 # Seguridad
 telegram_connection.json
+water_status.json
 .env
 telegram_config.py
