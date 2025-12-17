@@ -37,16 +37,38 @@ class ChatbotLLM:
     Clase principal del chatbot que maneja múltiples proveedores de LLM
     """
     
-    def __init__(self, provider: str = "openai", api_key: str = None):
+    def __init__(self, provider: str = "openai"):
         """
         Inicializa el chatbot con el proveedor especificado
         
         Args:
-            provider: 'openai', 'google', o 'anthropic'
-            api_key: API key del proveedor
+            provider: 'openai', 'google', 'anthropic', o 'openrouter'
+        
+        Note:
+            Las API keys se cargan automáticamente desde variables de entorno (.env):
+            - OPENAI_API_KEY para OpenAI
+            - GOOGLE_API_KEY para Google Gemini
+            - ANTHROPIC_API_KEY para Anthropic
+            - OPENROUTER_API_KEY para OpenRouter
         """
         self.provider = provider.lower()
-        self.api_key = api_key
+        
+        # Cargar API key desde variables de entorno según el proveedor
+        env_key_map = {
+            "openai": "OPENAI_API_KEY",
+            "google": "GOOGLE_API_KEY",
+            "anthropic": "ANTHROPIC_API_KEY",
+            "openrouter": "OPENROUTER_API_KEY"
+        }
+        
+        env_var = env_key_map.get(self.provider)
+        if env_var:
+            self.api_key = os.getenv(env_var)
+            if not self.api_key:
+                raise ValueError(f"Variable de entorno '{env_var}' no encontrada. Configúrala en tu archivo .env")
+        else:
+            raise ValueError(f"Proveedor '{self.provider}' no soportado")
+        
         self.conversation_history = []
         
         # Contexto del sistema sobre el proyecto
@@ -133,8 +155,8 @@ Rangos seguros de referencia:
             
             return response.choices[0].message.content
             
-        except Exception as e:
-            return f"Error al conectar con OpenAI: {str(e)}"
+        except Exception:
+            return "😔 El servicio no está disponible en este momento. Intenta más tarde."
     
     def get_response_google(self, user_message: str) -> str:
         """Obtiene respuesta usando Google Gemini"""
@@ -154,8 +176,8 @@ Rangos seguros de referencia:
             
             return response.text
             
-        except Exception as e:
-            return f"Error al conectar con Google Gemini: {str(e)}"
+        except Exception:
+            return "😔 El servicio no está disponible en este momento. Intenta más tarde."
     
     def get_response_anthropic(self, user_message: str) -> str:
         """Obtiene respuesta usando Anthropic Claude"""
@@ -179,8 +201,8 @@ Rangos seguros de referencia:
             
             return response.content[0].text
             
-        except Exception as e:
-            return f"Error al conectar con Anthropic: {str(e)}"
+        except Exception:
+            return "😔 El servicio no está disponible en este momento. Intenta más tarde."
     
     def get_response_openrouter(self, user_message: str) -> str:
         """Obtiene respuesta usando OpenRouter con backoff exponencial"""
@@ -254,7 +276,7 @@ Rangos seguros de referencia:
                             time.sleep(delay)
                             continue
                         else:
-                            return "⏳ **Límite de requests alcanzado**\n\nPor favor espera 1 minuto e intenta de nuevo.\n\n💡 **Tip**: Los modelos gratuitos tienen límites de 20 requests/minuto."
+                            return "⏳ Has excedido el límite de solicitudes. Espera unos minutos e intenta de nuevo."
                     
                     # Otros errores HTTP
                     response.raise_for_status()
@@ -268,21 +290,23 @@ Rangos seguros de referencia:
             
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
-                return "⏳ **Límite de requests alcanzado**\n\nEspera 1 minuto y vuelve a intentar.\n\n💡 **Tip**: Los modelos gratis tienen límites de 20 requests/minuto."
+                return "⏳ Has excedido el límite de solicitudes. Espera unos minutos e intenta de nuevo."
             elif e.response.status_code == 401:
-                return "❌ **API Key inválida**\n\nVerifica tu API key en: https://openrouter.ai/keys"
+                return "🔑 Problema con la configuración. Verifica tu API key."
             elif e.response.status_code == 402:
-                return "💳 **Créditos insuficientes**\n\nEste modelo requiere créditos. Usa un modelo con sufijo ':free'"
+                return "💳 Se han terminado los créditos. Usa un modelo gratuito."
+            elif e.response.status_code == 404:
+                return "🔍 El modelo no está disponible en este momento."
             else:
-                return f"❌ **Error HTTP {e.response.status_code}**\n\n{str(e)}"
+                return "😔 El servicio no está disponible en este momento. Intenta más tarde."
         except requests.exceptions.Timeout:
-            return "⏱️ **Timeout**\n\nLa respuesta tardó demasiado. Intenta de nuevo."
-        except requests.exceptions.RequestException as e:
-            return f"🌐 **Error de conexión**\n\n{str(e)}"
+            return "⏱️ La solicitud tardó demasiado tiempo. Intenta de nuevo."
+        except requests.exceptions.RequestException:
+            return "🌐 Problema de conexión. Verifica tu internet e intenta de nuevo."
         except KeyError:
-            return "❌ **Error en la respuesta**\n\nLa API retornó un formato inesperado."
-        except Exception as e:
-            return f"❌ **Error inesperado**\n\n{str(e)}"
+            return "😔 El modelo no está disponible en este momento."
+        except Exception:
+            return "😔 El servicio no está disponible en este momento. Intenta más tarde."
 
     
     def chat(self, user_message: str) -> str:
@@ -345,6 +369,9 @@ def create_chatbot_widget():
     
     if "chat_expanded" not in st.session_state:
         st.session_state.chat_expanded = False
+    
+    if "last_error" not in st.session_state:
+        st.session_state.last_error = None
     
     # CSS moderno y limpio
     st.markdown("""
@@ -544,6 +571,13 @@ def create_chatbot_widget():
             "Anthropic (Claude)": "anthropic"
         }
         
+        env_var_map = {
+            "openrouter": "OPENROUTER_API_KEY",
+            "openai": "OPENAI_API_KEY",
+            "google": "GOOGLE_API_KEY",
+            "anthropic": "ANTHROPIC_API_KEY"
+        }
+        
         selected_provider = st.selectbox(
             "Proveedor",
             available,
@@ -551,45 +585,53 @@ def create_chatbot_widget():
             help="💡 OpenRouter da acceso GRATIS a Gemini, Llama, y más"
         )
         
-        api_key = st.text_input(
-            "API Key",
-            type="password",
-            key="llm_api_key",
-            placeholder="Pega tu API key aquí",
-            help="🔗 OpenRouter: openrouter.ai/keys | Gemini: makersuite.google.com"
-        )
+        # Espaciado
+        st.markdown("")
         
-        col1, col2 = st.columns(2)
+        # Verificar qué variable de entorno se necesita
+        provider_code = provider_map[selected_provider]
+        required_env_var = env_var_map[provider_code]
         
-        with col1:
-            if st.button("🔌 Conectar", use_container_width=True):
-                if not api_key:
-                    st.error("⚠️ Ingresa API Key")
-                else:
-                    try:
-                        provider_code = provider_map[selected_provider]
-                        st.session_state.chatbot = ChatbotLLM(
-                            provider=provider_code,
-                            api_key=api_key
-                        )
-                        st.success("✅ Conectado!")
-                        st.balloons()
-                    except Exception as e:
-                        st.error(f"❌ {str(e)[:80]}...")
+        # Verificar si la variable de entorno está configurada
+        is_configured = os.getenv(required_env_var) is not None
         
-        with col2:
-            if st.button("🗑️ Limpiar", use_container_width=True):
-                st.session_state.chat_messages = []
-                if st.session_state.chatbot:
-                    st.session_state.chatbot.clear_history()
-                st.success("🧹 Limpiado!")
+        if is_configured:
+            st.success(f"✅ {required_env_var} configurada")
+        else:
+            st.warning(f"⚠️ Configura {required_env_var} en tu archivo .env")
+            st.caption("🔗 OpenRouter: openrouter.ai/keys | Gemini: makersuite.google.com")
+        
+        # Espaciado antes del botón
+        st.markdown("")
+        
+        # Botón de conectar (ocupa todo el ancho)
+        if st.button("🔌 Conectar", use_container_width=True, disabled=not is_configured):
+            try:
+                st.session_state.chatbot = ChatbotLLM(provider=provider_code)
+                st.session_state.last_error = None  # Limpiar errores previos
+                st.success("✅ Conectado!")
+                st.balloons()
+            except Exception as e:
+                error_msg = str(e)
+                st.session_state.last_error = error_msg
+                st.error(f"❌ Error de conexión")
         
         st.divider()
+        
+        # Estado de conexión
         if st.session_state.chatbot:
             st.success(f"🟢 **Conectado:** {selected_provider}")
             st.caption(f"💬 {len(st.session_state.chat_messages)} mensajes")
         else:
             st.info("🔴 **Desconectado**")
+        
+        # Mostrar último error técnico (solo para debugging)
+        if st.session_state.last_error:
+            with st.expander("⚠️ Último error técnico", expanded=False):
+                st.code(st.session_state.last_error, language="text")
+                if st.button("🗑️ Limpiar error", key="clear_error"):
+                    st.session_state.last_error = None
+                    st.rerun()
     
     # CSS para posicionar el widget en la esquina inferior derecha (fijo)
     st.markdown("""
@@ -688,10 +730,14 @@ def create_chatbot_widget():
             <div style="padding: 20px; background: #F5F5F5; border-radius: 8px; margin: 16px;">
                 <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">Pasos rápidos:</p>
                 <ol style="font-size: 12px; color: #616161; margin: 0; padding-left: 20px;">
-                    <li>Selecciona "OpenRouter"</li>
-                    <li>Añade OPENROUTER_API_KEY a tu .env</li>
+                    <li>Selecciona un proveedor (ej: "OpenRouter")</li>
+                    <li>Configura la variable de entorno en tu archivo .env</li>
+                    <li>Reinicia la aplicación</li>
                     <li>Haz clic en "🔌 Conectar"</li>
                 </ol>
+                <p style="font-size: 11px; color: #757575; margin-top: 12px;">
+                    💡 Las API keys se cargan automáticamente desde el archivo .env
+                </p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -762,13 +808,35 @@ def create_chatbot_widget():
                     response = st.session_state.chatbot.chat(prompt)
                     st.session_state.chat_messages.append({
                         "role": "assistant",
-
                         "content": response
                     })
+                    st.session_state.last_error = None  # Limpiar error si la respuesta fue exitosa
                     st.rerun()
                 except Exception as e:
-                    st.error(f"❌ Error: {str(e)[:100]}...")
-                    st.session_state.chat_messages.pop()
+                    # Guardar error técnico para el sidebar
+                    st.session_state.last_error = str(e)
+                    
+                    # Mostrar mensaje amigable en el chat
+                    error_msg = "😔 **Lo siento, no pude procesar tu pregunta**\n\n"
+                    
+                    # Detectar tipo de error y dar mensaje específico
+                    error_str = str(e).lower()
+                    if "404" in error_str or "not found" in error_str:
+                        error_msg += "🔍 El modelo no está disponible en este momento.\n\n💡 **Sugerencia**: Verifica que el modelo esté activo o prueba con otro proveedor."
+                    elif "429" in error_str or "rate limit" in error_str or "quota" in error_str:
+                        error_msg += "⏳ Has excedido el límite de solicitudes.\n\n💡 **Sugerencia**: Espera unos minutos e intenta de nuevo, o considera usar otro proveedor."
+                    elif "401" in error_str or "unauthorized" in error_str or "api key" in error_str:
+                        error_msg += "🔑 Problema con la API key.\n\n💡 **Sugerencia**: Verifica que tu API key sea válida y esté correctamente configurada en el archivo .env"
+                    elif "timeout" in error_str:
+                        error_msg += "⏱️ La solicitud tardó demasiado tiempo.\n\n💡 **Sugerencia**: Intenta de nuevo en unos momentos."
+                    else:
+                        error_msg += "❌ Ocurrió un error inesperado.\n\n💡 **Sugerencia**: Revisa la sección de configuración en el sidebar para más detalles técnicos."
+                    
+                    st.session_state.chat_messages.append({
+                        "role": "assistant",
+                        "content": error_msg
+                    })
+                    st.rerun()
         
         # Disclaimer
         st.markdown("""
