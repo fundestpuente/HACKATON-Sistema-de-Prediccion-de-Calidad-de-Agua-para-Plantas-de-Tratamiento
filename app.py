@@ -315,8 +315,8 @@ def tab_dashboard():
             
     # Botones de la barra lateral
     # st.sidebar.markdown('---')
-    analyze_button = st.sidebar.button("Analizar Muestra", type="primary", use_container_width=True)
-    st.sidebar.button("Restablecer Parámetros", type="secondary", use_container_width=True)
+    analyze_button = st.sidebar.button("Analizar Muestra", type="primary", width="stretch")
+    st.sidebar.button("Restablecer Parámetros", type="secondary", width="stretch")
 
     # Área principal
     # st.title("Dashboard")
@@ -435,7 +435,7 @@ def tab_dashboard():
                 <span class="material-symbols-outlined">{icon_symbol}</span>
             </div>
             <h3 class="result-title {title_class}">{title_text}</h3>
-            <p class="result-confidence">{confidence:.1f}% Confidence</p>
+            <p class="result-confidence">{confidence:.1f}% Confianza</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -571,13 +571,13 @@ def tab_vision():
         
         with col_img:
             st.subheader("Muestra Analizada")
-            st.image(image_bytes, use_container_width=True, caption=uploaded_file.name)
+            st.image(image_bytes, width="stretch", caption=uploaded_file.name)
         
         with col_result:
             st.subheader("Resultados del Análisis")
             
             # Botón de análisis
-            if st.button("🔬 Analizar Turbidez", type="primary", use_container_width=True):
+            if st.button("🔬 Analizar Turbidez", type="primary", width="stretch"):
                 with st.spinner("Analizando imagen..."):
                     # Llamar a la función de visión
                     result = analyze_water_turbidity(image_bytes)
@@ -730,12 +730,12 @@ def tab_vision():
                 plot_bgcolor='rgba(0,0,0,0)'
             )
             
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             
             # Botón para nuevo análisis
             col_btn1, col_btn2 = st.columns(2)
             with col_btn1:
-                if st.button("🔄 Analizar Nueva Imagen", use_container_width=True):
+                if st.button("🔄 Analizar Nueva Imagen", width="stretch"):
                     del st.session_state['vision_result']
                     st.rerun()
             
@@ -761,7 +761,7 @@ Cumple OMS: {'Sí' if result['meets_who_standards'] else 'No'}
                     data=result_text,
                     file_name=f"turbidity_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
                     mime="text/plain",
-                    use_container_width=True
+                    width="stretch"
                 )
     else:
         # Estado inicial sin imagen
