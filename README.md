@@ -1,8 +1,8 @@
-# 💧 Sistema de Predicción de Calidad de Agua para Plantas de Tratamiento
+# Sistema de Predicción de Calidad de Agua para Plantas de Tratamiento
 **Una herramienta de Machine Learning para evaluar la potabilidad del agua**
 
 **Curso:** Samsung Innovation Campus – Inteligencia Artificial (Ecuador 2025)  
-**Carpeta:** `/SIC25-Sistema-de-Prediccion-de-Calidad-de-Agua-para-Plantas-de-Tratamiento`
+**Carpeta:** `/HACKATON-Sistema-de-Prediccion-de-Calidad-de-Agua-para-Plantas-de-Tratamiento`
 
 ---
 
@@ -15,39 +15,54 @@
 ---
 
 ## 📝 Descripción del Proyecto
-El acceso a agua potable segura es esencial para la salud pública y el desarrollo sostenible. La calidad del agua puede verse comprometida por diversos factores químicos y físicos que no siempre son detectables a simple vista.
+El acceso a agua potable segura es esencial para la salud pública y el desarrollo sostenible. Este proyecto desarrolla un **sistema inteligente de predicción de potabilidad del agua** utilizando algoritmos de Machine Learning, Visión por Computadora e Inteligencia Artificial Generativa.
 
-Este proyecto tiene como objetivo desarrollar un **sistema inteligente de predicción de potabilidad del agua** utilizando algoritmos de Machine Learning. El modelo analiza características físico-químicas críticas como el pH, la dureza, los sólidos disueltos, las cloraminas, los sulfatos, la conductividad, el carbono orgánico, los trihalometanos y la turbidez para determinar si una muestra de agua es segura para el consumo humano.
+El sistema analiza características físico-químicas críticas (pH, dureza, sólidos disueltos, cloraminas, sulfatos, conductividad, carbono orgánico, trihalometanos y turbidez) para determinar si una muestra de agua es segura.
 
-La solución incluye un **dashboard interactivo desarrollado en Streamlit** que permite:
-- Ingresar parámetros manualmente para una evaluación rápida.
-- Cargar archivos CSV para realizar predicciones masivas (por lotes).
-- Visualizar la importancia de las características y comparar la muestra con promedios seguros.
-- **Recibir alertas en tiempo real vía Telegram** cuando se detectan niveles de riesgo o agua no potable.
+### 🚀 Características Principales
+- **Predicción ML:** Modelo entrenado para clasificar agua como Potable o No Potable.
+- **Dashboard Interactivo:** Desarrollado en Streamlit para visualización y control.
+- **Alertas en Tiempo Real:** Integración con **Telegram** para notificaciones automáticas de riesgo.
+- **Asistente IA:** Chatbot integrado (OpenAI/Gemini) para consultas técnicas sobre calidad del agua.
+- **Visión por Computadora:** Módulo experimental para análisis visual de turbidez.
+
+---
+
+## 📸 Imágenes Destacadas del Dashboard
+
+*(Espacio reservado para capturas de pantalla del sistema)*
+
+| Dashboard Principal | Predicción y Alertas |
+|---------------------|----------------------|
+| ![Dashboard](https://via.placeholder.com/400x200?text=Dashboard+Principal) | ![Prediccion](https://via.placeholder.com/400x200?text=Prediccion+y+Alertas) |
+
+| Asistente IA | Análisis de Visión |
+|--------------|--------------------|
+| ![Chatbot](https://via.placeholder.com/400x200?text=Asistente+IA) | ![Vision](https://via.placeholder.com/400x200?text=Vision+Module) |
 
 ---
 
 ## ⚙️ Instrucciones de Instalación y Ejecución
 
-### Requisitos
+### Requisitos Previos
 - **Python 3.10+**
 - **Cuenta de Telegram** (para las alertas)
-- **Librerías:** incluidas en `requirements.txt`
+- **API Key (Opcional):** OpenAI o Google Gemini para el chatbot.
 
-### 🪜 Pasos de Ejecución
+### 🪜 Pasos de Instalación
 
-1. **Clonar el repositorio o ubicarte en la carpeta del proyecto:**
+1. **Clonar el repositorio:**
    ```bash
-   git clone https://github.com/fundestpuente/SIC25-Sistema-de-Prediccion-de-Calidad-de-Agua-para-Plantas-de-Tratamiento.git
-   cd "SIC25-Sistema-de-Prediccion-de-Calidad-de-Agua-para-Plantas-de-Tratamiento"
+   git clone https://github.com/fundestpuente/HACKATON-Sistema-de-Prediccion-de-Calidad-de-Agua-para-Plantas-de-Tratamiento.git
+   cd "HACKATON-Sistema-de-Prediccion-de-Calidad-de-Agua-para-Plantas-de-Tratamiento"
    ```
 
-2. **Crear y activar un entorno virtual (opcional pero recomendado):**
+2. **Crear y activar un entorno virtual:**
    ```bash
    python -m venv venv
-   # En Windows:
+   # Windows:
    .\venv\Scripts\activate
-   # En macOS/Linux:
+   # macOS/Linux:
    source venv/bin/activate
    ```
 
@@ -57,103 +72,78 @@ La solución incluye un **dashboard interactivo desarrollado en Streamlit** que 
    ```
 
 4. **Configurar Variables de Entorno:**
-   Crea un archivo `.env` en la raíz del proyecto y añade tu token de Telegram:
+   Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
    ```env
-   TELEGRAM_TOKEN=tu_token_aqui
+   TELEGRAM_TOKEN=tu_token_de_telegram_aqui
+   # Variables para el Chatbot (Agregar los modelos a usar):
+   OPENAI_API_KEY=tu_api_key_openai
+   GOOGLE_API_KEY=tu_api_key_gemini
+   OPENROUTER_API_KEY=tu_api_key_openrouter
+   ANTHROPIC_API_KEY=tu_api_key_anthropic
    ```
 
-5. **Ejecutar la aplicación web:**
-   Al iniciar la aplicación, el **Bot de Telegram se iniciará automáticamente** en segundo plano.
+5. **Ejecutar la aplicación:**
    ```bash
    streamlit run app.py
    ```
-   La aplicación se abrirá en tu navegador y verás en la terminal el mensaje: `🤖 Bot de Alertas ESCUCHANDO...`
+   El bot de Telegram se iniciará automáticamente en segundo plano.
 
 ---
 
-## 🤖 Uso del Bot de Telegram
+## 🤖 Guía de Uso
 
-1. Abre tu bot en Telegram.
-2. Envía el comando `/start`. El bot registrará tu ID de usuario.
-3. En el Dashboard de Streamlit, ve a la barra lateral y presiona el botón **"Sincronizar con Telegram"**.
-4. ¡Listo! Recibirás alertas automáticas si:
-   - La predicción indica que el agua es **NO POTABLE**.
-   - El **pH** se encuentra fuera del rango seguro (6.5 - 8.5).
+### 1. Bot de Telegram
+- Busca tu bot en Telegram y envía `/start`.
+- En el Dashboard, usa el botón **"Sincronizar con Telegram"** en la barra lateral.
+- Recibirás alertas si el agua es **NO POTABLE** o si el **pH** es inseguro.
 
----
----
+### 2. Asistente IA
+- Ve a la sección **"🤖 Asistente IA"**.
+- Selecciona tu proveedor (OpenAI, Gemini, etc.).
+- Pregunta sobre normativas, tratamientos o interpretación de datos.
 
-## 🤖 Asistente IA de Calidad de Agua
-
-El sistema incluye un chatbot inteligente que puede responder preguntas sobre:
-- Parámetros de calidad de agua y sus valores seguros
-- Interpretación de resultados de análisis
-- Normativas y estándares (OMS, EPA)
-- Recomendaciones técnicas y procedimientos
-
-### Proveedores Soportados:
-- **OpenAI (GPT-3.5/GPT-4)** - Respuestas precisas y rápidas
-- **Google Gemini** - ⭐ GRATIS, sin tarjeta de crédito
-- **Anthropic (Claude)** - Excelente para explicaciones técnicas
-
-### Configuración Rápida:
-1. Obtén una API key de tu proveedor preferido 
-2. En la app, ve a la barra lateral → "🤖 Asistente IA"
-3. Selecciona tu proveedor e ingresa tu API key
-4. ¡Empieza a hacer preguntas!
+### 3. Módulo de Visión (Experimental)
+- Permite analizar imágenes de muestras de agua para estimar turbidez visualmente (requiere configuración de cámara o carga de imágenes).
 
 
 
-## 📂 Estructura del Código
+## 📂 Estructura del Proyecto
 ```
 SIC25-Sistema-de-Prediccion-de-Calidad-de-Agua-para-Plantas-de-Tratamiento/
 │
-├── data/                       # Conjuntos de datos
-│   ├── processed/              # Datos limpios y procesados
-│   ├── raw/                    # Datos originales (water_potability.csv)
+├── data/                       # Datos del proyecto
+│   ├── processed/              # Datos limpios
+│   ├── raw/                    # Datos crudos
 │   └── test/                   # Muestras de prueba
 │
-├── models/                     # Modelos serializados y escaladores
-│   ├── water_potability_model.pkl
-│   └── scaler.pkl
+├── models/                     # Modelos entrenados (.pkl)
 │
-├── notebooks/                  # Notebooks de Jupyter para análisis y experimentación
-│   ├── 01_eda_analisis.ipynb   # Análisis Exploratorio de Datos (EDA)
-│   ├── 02_limpieza_etl.ipynb   # Limpieza y transformación de datos
-│   └── 03_entrenamiento.ipynb  # Entrenamiento y evaluación de modelos
+├── notebooks/                  # Notebooks de Jupyter
+│   ├── 01_eda_analisis.ipynb
+│   ├── 02_limpieza_etl.ipynb
+│   └── 03_entrenamiento.ipynb
 │
-├── src/                        # Código fuente modular
-│   ├── model_train.py          # Script de entrenamiento
-│   ├── preprocessing.py        # Funciones de preprocesamiento
-│   ├── telegram_bot.py         # Bot de notificaciones y alertas
-│   └── test_data.py            # Generación de datos de prueba
+├── src/                        # Código fuente
+│   ├── chatbot_llm.py          # Lógica del Chatbot IA
+│   ├── model_train.py          # Entrenamiento del modelo
+│   ├── preprocessing.py        # Pipeline de preprocesamiento
+│   ├── telegram_bot.py         # Bot de Telegram
+│   ├── test_data.py            # Generador de datos dummy
+│   └── vision_module.py        # Análisis de imágenes (Turbidez)
 │
-├── app.py                      # Aplicación principal (Dashboard Streamlit)
-├── requirements.txt            # Dependencias del proyecto
-└── README.md                   # Documentación del proyecto
+├── app.py                      # Aplicación principal (Streamlit)
+├── requirements.txt            # Dependencias
+├── telegram_connection.json    # Persistencia de usuarios del bot
+└── README.md                   # Documentación
 ```
 
 ---
 
-## ✅ Herramientas Implementadas
-- **Lenguaje:** Python 3.10+
-- **Framework Web:** Streamlit
-- **Machine Learning:** Scikit-learn, XGBoost, Imbalanced-learn
-- **Análisis y Procesamiento:** Pandas, Numpy
+## Tecnologías Utilizadas
+- **Core:** Python 3.10+
+- **Interfaz:** Streamlit
+- **ML/Data:** Scikit-learn, XGBoost, Pandas, Numpy
+- **Visión:** OpenCV
+- **IA Generativa:** OpenAI API, Google GenAI
+- **Notificaciones:** Python-telegram-bot
 - **Visualización:** Plotly, Matplotlib, Seaborn
-- **Notificaciones:** Python-telegram-bot API
-- **Control de Versiones:** Git + GitHub
-
----
-
-## 🌱 Impacto del Proyecto
-
-Este sistema contribuye a:
-
-- **Automatizar la evaluación** de la calidad del agua en plantas de tratamiento.
-- **Reducir el tiempo** de análisis mediante predicciones instantáneas.
-- **Apoyar la toma de decisiones** con visualizaciones claras sobre los factores de riesgo.
-- **Mejorar la salud pública** al identificar agua no potable antes de su distribución.
-
-> "El agua es la fuerza motriz de toda la naturaleza."  
-> — *Leonardo da Vinci*
