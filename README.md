@@ -72,15 +72,15 @@ El sistema analiza características físico-químicas críticas (pH, dureza, só
    ```
 
 4. **Configurar Variables de Entorno:**
-   Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+   Crea un archivo `.env` en la raíz del proyecto y añade tu token de Telegram:
    ```env
-   TELEGRAM_TOKEN=tu_token_de_telegram_aqui
-   # Variables para el Chatbot (Agregar los modelos a usar):
-   OPENAI_API_KEY=tu_api_key_openai
-   GOOGLE_API_KEY=tu_api_key_gemini
-   OPENROUTER_API_KEY=tu_api_key_openrouter
-   ANTHROPIC_API_KEY=tu_api_key_anthropic
+   TELEGRAM_TOKEN=tu_token_aqui
    ```
+   
+   **Notas:**
+   - Para Telegram: Obtén tu token desde [@BotFather](https://t.me/botfather)
+   - Para OpenAI: Obtén tu API key desde [platform.openai.com](https://platform.openai.com/api-keys)
+   - La funcionalidad de Análisis de Imágenes requiere OpenAI API Key
 
 5. **Ejecutar la aplicación:**
    ```bash
