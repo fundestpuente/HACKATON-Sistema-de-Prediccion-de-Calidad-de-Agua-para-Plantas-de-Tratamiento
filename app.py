@@ -277,7 +277,7 @@ st.sidebar.markdown("""
 st.sidebar.markdown('---')
 
 # Navegación
-options = ["Dashboard General", "Análisis de Imágenes", "Monitoreo de Cámaras", "Asistente de IA"]
+options = ["Dashboard General", "Análisis de Imágenes", "Monitoreo de Cámaras"]
 selection = st.sidebar.radio("Navegación", options, label_visibility="collapsed")
 st.sidebar.markdown('---')
 
@@ -1118,5 +1118,4 @@ elif selection == "Análisis de Imágenes":
     tab_vision()
 elif selection == "Monitoreo de Cámaras":
     tab_cameras()
-elif selection == "Asistente de IA":
-    tab_chatbot()
+create_chatbot_widget()
