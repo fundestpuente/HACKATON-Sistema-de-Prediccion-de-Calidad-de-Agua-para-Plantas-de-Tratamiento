@@ -206,6 +206,32 @@ st.markdown("""
         color: var(--primary);
     }
     
+    /* 3. Monitoreo de Cámaras */
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3) p::before {
+        content: "videocam";
+        font-family: 'Material Symbols Outlined';
+        font-size: 20px;
+        font-weight: normal;
+        font-variation-settings: 'FILL' 0;
+    }
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3):has(input:checked) p::before {
+        font-variation-settings: 'FILL' 1;
+        color: var(--primary);
+    }
+    
+    /* 4. AI Assistant */
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(4) p::before {
+        content: "smart_toy";
+        font-family: 'Material Symbols Outlined';
+        font-size: 20px;
+        font-weight: normal;
+        font-variation-settings: 'FILL' 0;
+    }
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(4):has(input:checked) p::before {
+        font-variation-settings: 'FILL' 1;
+        color: var(--primary);
+    }
+    
 </style>
 """, unsafe_allow_html=True)
 
@@ -251,7 +277,7 @@ st.sidebar.markdown("""
 st.sidebar.markdown('---')
 
 # Navegación
-options = ["Dashboard General", "Análisis de Imágenes"]
+options = ["Dashboard General", "Análisis de Imágenes", "Monitoreo de Cámaras", "Asistente de IA"]
 selection = st.sidebar.radio("Navegación", options, label_visibility="collapsed")
 st.sidebar.markdown('---')
 
@@ -809,10 +835,288 @@ Cumple OMS: {'Sí' if result['meets_who_standards'] else 'No'}
         </div>
         """, unsafe_allow_html=True)
 
+def tab_cameras():
+    """Tab de monitoreo de cámaras en tiempo real"""
+    st.header("Monitoreo de Cámaras en Tiempo Real")
+    st.caption("Sistema de vigilancia inteligente para fuentes de agua en comunidades rurales")
+    
+    # Cargar datos de cámaras
+    cameras_file = os.path.join(BASE_DIR, "cameras/info.json")
+    try:
+        with open(cameras_file, 'r', encoding='utf-8') as f:
+            cameras_data = json.load(f)
+    except Exception as e:
+        st.error(f"Error al cargar datos de cámaras: {str(e)}")
+        return
+    
+    # Panel de control superior con estadísticas
+    st.markdown("### 📊 Panel de Control")
+    
+    # Calcular estadísticas
+    total_cameras = len(cameras_data)
+    online_cameras = sum(1 for cam in cameras_data if cam['status'] == 'online')
+    total_detections_today = sum(cam['daily_detections'] for cam in cameras_data)
+    high_alerts = sum(1 for cam in cameras_data if cam['alert_level'] in ['high', 'critical'])
+    
+    # Métricas principales
+    metrics_cols = st.columns(4)
+    with metrics_cols[0]:
+        st.metric(
+            label="🎥 Cámaras Activas",
+            value=f"{online_cameras}/{total_cameras}",
+            delta="100%" if online_cameras == total_cameras else f"{int(online_cameras/total_cameras*100)}%"
+        )
+    
+    with metrics_cols[1]:
+        st.metric(
+            label="🔍 Detecciones Hoy",
+            value=total_detections_today,
+            delta="+12 vs ayer"
+        )
+    
+    with metrics_cols[2]:
+        st.metric(
+            label="⚠️ Alertas Altas",
+            value=high_alerts,
+            delta=f"{high_alerts} activas",
+            delta_color="inverse"
+        )
+    
+    with metrics_cols[3]:
+        avg_quality = sum(cam['water_quality']['turbidity_ntu'] for cam in cameras_data) / len(cameras_data)
+        st.metric(
+            label="💧 Turbidez Promedio",
+            value=f"{avg_quality:.1f} NTU",
+            delta="Monitoreo continuo"
+        )
+    
+    st.markdown("---")
+    
+    # Filtros
+    col_filter1, col_filter2, col_filter3 = st.columns([2, 2, 2])
+    
+    with col_filter1:
+        filter_alert = st.selectbox(
+            "🚨 Nivel de Alerta",
+            ["Todos", "Crítico", "Alto", "Medio", "Bajo"],
+            index=0
+        )
+    
+    with col_filter2:
+        filter_location = st.selectbox(
+            "📍 Ubicación",
+            ["Todas"] + list(set(cam['location'] for cam in cameras_data)),
+            index=0
+        )
+    
+    with col_filter3:
+        sort_by = st.selectbox(
+            "🔽 Ordenar por",
+            ["Última actualización", "Nivel de alerta", "Detecciones", "Turbidez"],
+            index=0
+        )
+    
+    # Aplicar filtros
+    filtered_cameras = cameras_data.copy()
+    
+    if filter_alert != "Todos":
+        alert_map = {"Crítico": "critical", "Alto": "high", "Medio": "medium", "Bajo": "low"}
+        filtered_cameras = [cam for cam in filtered_cameras if cam['alert_level'] == alert_map[filter_alert]]
+    
+    if filter_location != "Todas":
+        filtered_cameras = [cam for cam in filtered_cameras if cam['location'] == filter_location]
+    
+    # Ordenar
+    if sort_by == "Nivel de alerta":
+        alert_order = {'critical': 0, 'high': 1, 'medium': 2, 'low': 3}
+        filtered_cameras.sort(key=lambda x: alert_order.get(x['alert_level'], 4))
+    elif sort_by == "Detecciones":
+        filtered_cameras.sort(key=lambda x: x['daily_detections'], reverse=True)
+    elif sort_by == "Turbidez":
+        filtered_cameras.sort(key=lambda x: x['water_quality']['turbidity_ntu'], reverse=True)
+    
+    st.markdown("---")
+    
+    # Mostrar cámaras
+    if not filtered_cameras:
+        st.info("🔍 No se encontraron cámaras con los filtros seleccionados")
+        return
+    
+    for camera in filtered_cameras:
+        # Determinar color de alerta
+        alert_colors = {
+            'low': {'bg': '#d1fae5', 'border': '#22c55e', 'icon': 'check_circle', 'text': 'Bajo'},
+            'medium': {'bg': '#fef3c7', 'border': '#f59e0b', 'icon': 'warning', 'text': 'Medio'},
+            'high': {'bg': '#fee2e2', 'border': '#ef4444', 'icon': 'error', 'text': 'Alto'},
+            'critical': {'bg': '#fecaca', 'border': '#991b1b', 'icon': 'dangerous', 'text': 'Crítico'}
+        }
+        
+        alert_info = alert_colors.get(camera['alert_level'], alert_colors['low'])
+        
+        with st.container(border=True):
+            # Header de la cámara
+            col_header_left, col_header_right = st.columns([3, 1])
+            
+            with col_header_left:
+                st.markdown(f"""
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--primary);">videocam</span>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.25rem;">{camera['name']}</h3>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">
+                            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">location_on</span>
+                            {camera['location']} • ID: {camera['camera_id']}
+                        </p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col_header_right:
+                st.markdown(f"""
+                <div style="text-align: right;">
+                    <div style="display: inline-flex; align-items: center; gap: 0.5rem; 
+                                background: {alert_info['bg']}; border: 2px solid {alert_info['border']};
+                                padding: 0.5rem 1rem; border-radius: 2rem;">
+                        <span class="material-symbols-outlined" style="font-size: 20px; color: {alert_info['border']};">{alert_info['icon']}</span>
+                        <span style="font-weight: bold; color: {alert_info['border']};">Alerta {alert_info['text']}</span>
+                    </div>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
+                        <span class="material-symbols-outlined" style="font-size: 14px;">schedule</span>
+                        {camera['last_update']}
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # Cuerpo principal - Imagen y datos
+            col_image, col_data = st.columns([2, 3])
+            
+            with col_image:
+                # Mostrar imagen de cámara
+                img_path = os.path.join(BASE_DIR, camera['img'])
+                if os.path.exists(img_path):
+                    st.image(img_path, use_container_width=True, caption="Feed en Tiempo Real")
+                else:
+                    st.info("📷 Imagen no disponible")
+                
+                # Estado de conexión
+                st.markdown(f"""
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #22c55e;"></div>
+                    <span style="font-size: 0.9rem; color: var(--text-secondary);">
+                        En línea • {camera['avg_response_time']} tiempo respuesta
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col_data:
+                # Descripción
+                st.markdown(f"**Descripción:** {camera['description']}")
+                
+                # Calidad del agua
+                st.markdown("#### 💧 Parámetros de Calidad")
+                quality = camera['water_quality']
+                
+                quality_cols = st.columns(3)
+                with quality_cols[0]:
+                    turbidity_color = "#22c55e" if quality['turbidity_ntu'] < 5 else "#f59e0b" if quality['turbidity_ntu'] < 10 else "#ef4444"
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 0.75rem; background: {turbidity_color}20; border-radius: 0.5rem;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: {turbidity_color};">{quality['turbidity_ntu']}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">NTU</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with quality_cols[1]:
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 0.75rem; background: #e0f2fe; border-radius: 0.5rem;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #0369a1;">{quality['temperature_c']}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">°C</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with quality_cols[2]:
+                    ph_color = "#22c55e" if 6.5 <= quality['ph'] <= 8.5 else "#f59e0b"
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 0.75rem; background: {ph_color}20; border-radius: 0.5rem;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: {ph_color};">{quality['ph']}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">pH</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                # Objetos detectados
+                st.markdown("#### 🔍 Objetos Detectados Hoy")
+                
+                if not camera['objects_detected']:
+                    st.success("✅ No se detectaron contaminantes")
+                else:
+                    for obj in camera['objects_detected']:
+                        # Determinar color según riesgo
+                        risk_colors = {
+                            'low': '#22c55e',
+                            'medium': '#f59e0b',
+                            'high': '#ef4444',
+                            'critical': '#991b1b'
+                        }
+                        risk_color = risk_colors.get(obj['risk_level'], '#6b7280')
+                        
+                        # Calcular ancho de barra de confianza
+                        confidence_width = int(obj['confidence'] * 100)
+                        
+                        st.markdown(f"""
+                        <div style="margin: 0.5rem 0; padding: 0.75rem; background: {risk_color}10; 
+                                    border-left: 4px solid {risk_color}; border-radius: 0.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                <span style="font-weight: 600;">{obj['display_name']}</span>
+                                <span style="background: {risk_color}; color: white; padding: 0.2rem 0.5rem; 
+                                             border-radius: 0.25rem; font-size: 0.75rem;">
+                                    {obj['risk_level'].upper()}
+                                </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">
+                                <span>Confianza: {confidence_width}%</span>
+                                <div style="flex: 1; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
+                                    <div style="width: {confidence_width}%; height: 100%; background: {risk_color};"></div>
+                                </div>
+                                <span style="color: var(--text-secondary);">Cantidad: {obj['count']}</span>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+            
+            # Footer con acciones
+            st.markdown("<br>", unsafe_allow_html=True)
+            action_cols = st.columns([1, 1, 1, 1])
+            
+            with action_cols[0]:
+                if st.button("📊 Ver Historial", key=f"hist_{camera['camera_id']}", use_container_width=True):
+                    st.info("Funcionalidad de historial próximamente")
+            
+            with action_cols[1]:
+                if st.button("📸 Capturar Imagen", key=f"cap_{camera['camera_id']}", use_container_width=True):
+                    st.success("Imagen capturada")
+            
+            with action_cols[2]:
+                if st.button("🔔 Configurar Alertas", key=f"alert_{camera['camera_id']}", use_container_width=True):
+                    st.info("Panel de configuración próximamente")
+            
+            with action_cols[3]:
+                if st.button("📍 Ver en Mapa", key=f"map_{camera['camera_id']}", use_container_width=True):
+                    coords = camera.get('coordinates', {})
+                    if coords:
+                        st.map(pd.DataFrame([coords]), zoom=13)
+
+def tab_chatbot():
+    st.header("Asistente de IA")
+    st.caption("Haz preguntas sobre métricas de calidad del agua o recibe ayuda con el análisis.")
+    st.info("Módulo en desarrollo. Aquí se implementará el chatbot.")
+
 
 if selection == "Dashboard General":
     tab_dashboard()
 elif selection == "Análisis de Imágenes":
     tab_vision()
-
-create_chatbot_widget()
+elif selection == "Monitoreo de Cámaras":
+    tab_cameras()
+elif selection == "Asistente de IA":
+    tab_chatbot()

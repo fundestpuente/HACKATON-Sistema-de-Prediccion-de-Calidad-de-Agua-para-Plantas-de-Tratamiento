@@ -1,0 +1,189 @@
+[
+    {
+        "camera_id": "CAM-001",
+        "name": "Estanque Comunitario A",
+        "img": "cameras/Camera1.png",
+        "location": "Comunidad Rural San Pedro",
+        "coordinates": {"lat": -0.1807, "lng": -78.4678},
+        "description": "Cámara instalada en el estanque principal de la comunidad A para monitoreo continuo de calidad del agua.",
+        "status": "online",
+        "last_update": "2025-12-17T14:32:15",
+        "water_quality": {
+            "turbidity_ntu": 3.2,
+            "temperature_c": 18.5,
+            "ph": 7.1
+        },
+        "alert_level": "low",
+        "objects_detected": [
+            {
+                "object_type": "botella_plastica",
+                "display_name": "Botella Plástica",
+                "confidence": 0.95,
+                "risk_level": "medium",
+                "count": 1,
+                "bbox": [120, 340, 185, 420]
+            },
+            {
+                "object_type": "hoja",
+                "display_name": "Hojas/Vegetación",
+                "confidence": 0.88,
+                "risk_level": "low",
+                "count": 3,
+                "bbox": [450, 280, 510, 350]
+            }
+        ],
+        "daily_detections": 12,
+        "avg_response_time": "8 min"
+    },
+    {
+        "camera_id": "CAM-002",
+        "name": "Río Alimentador B",
+        "img": "cameras/Camera2.png",
+        "location": "Planta de Tratamiento Norte",
+        "coordinates": {"lat": -0.1895, "lng": -78.4512},
+        "description": "Monitoreo de agua entrante desde el río que alimenta la planta de tratamiento Norte.",
+        "status": "online",
+        "last_update": "2025-12-17T14:31:48",
+        "water_quality": {
+            "turbidity_ntu": 8.7,
+            "temperature_c": 20.2,
+            "ph": 6.8
+        },
+        "alert_level": "medium",
+        "objects_detected": [
+            {
+                "object_type": "lata_metalica",
+                "display_name": "Lata Metálica",
+                "confidence": 0.92,
+                "risk_level": "medium",
+                "count": 1,
+                "bbox": [280, 420, 325, 475]
+            },
+            {
+                "object_type": "algas",
+                "display_name": "Proliferación de Algas",
+                "confidence": 0.85,
+                "risk_level": "high",
+                "count": 1,
+                "bbox": [50, 100, 600, 400]
+            },
+            {
+                "object_type": "sedimentos",
+                "display_name": "Sedimentos Suspendidos",
+                "confidence": 0.78,
+                "risk_level": "medium",
+                "count": 1,
+                "bbox": [0, 0, 640, 480]
+            }
+        ],
+        "daily_detections": 24,
+        "avg_response_time": "12 min"
+    },
+    {
+        "camera_id": "CAM-003",
+        "name": "Lago Urbano Central",
+        "img": "cameras/Camera3.png",
+        "location": "Zona Urbana - Sector C",
+        "coordinates": {"lat": -0.1723, "lng": -78.4789},
+        "description": "Monitoreo de superficie en lago urbano para detección temprana de contaminantes visibles.",
+        "status": "online",
+        "last_update": "2025-12-17T14:33:02",
+        "water_quality": {
+            "turbidity_ntu": 15.3,
+            "temperature_c": 22.1,
+            "ph": 7.8
+        },
+        "alert_level": "high",
+        "objects_detected": [
+            {
+                "object_type": "plastico_flotante",
+                "display_name": "Plástico Flotante",
+                "confidence": 0.93,
+                "risk_level": "high",
+                "count": 5,
+                "bbox": [200, 250, 440, 370]
+            },
+            {
+                "object_type": "espuma_quimica",
+                "display_name": "Espuma Química",
+                "confidence": 0.89,
+                "risk_level": "critical",
+                "count": 1,
+                "bbox": [100, 150, 540, 320]
+            },
+            {
+                "object_type": "aceite_superficie",
+                "display_name": "Mancha de Aceite",
+                "confidence": 0.81,
+                "risk_level": "high",
+                "count": 1,
+                "bbox": [350, 200, 580, 410]
+            }
+        ],
+        "daily_detections": 38,
+        "avg_response_time": "15 min"
+    },
+    {
+        "camera_id": "CAM-004",
+        "name": "Canal Desagüe Principal",
+        "img": "cameras/Camera4.png",
+        "location": "Entrada Planta Sur",
+        "coordinates": {"lat": -0.1945, "lng": -78.4623},
+        "description": "Detección preventiva de contaminantes antes del ingreso a planta de tratamiento.",
+        "status": "online",
+        "last_update": "2025-12-17T14:32:55",
+        "water_quality": {
+            "turbidity_ntu": 22.8,
+            "temperature_c": 19.8,
+            "ph": 6.5
+        },
+        "alert_level": "high",
+        "objects_detected": [
+            {
+                "object_type": "residuo_solido",
+                "display_name": "Residuo Sólido",
+                "confidence": 0.90,
+                "risk_level": "medium",
+                "count": 2,
+                "bbox": [310, 390, 380, 460]
+            },
+            {
+                "object_type": "aceite_flotante",
+                "display_name": "Aceite Flotante",
+                "confidence": 0.87,
+                "risk_level": "high",
+                "count": 1,
+                "bbox": [150, 200, 490, 380]
+            },
+            {
+                "object_type": "bolsa_plastica",
+                "display_name": "Bolsas Plásticas",
+                "confidence": 0.94,
+                "risk_level": "medium",
+                "count": 3,
+                "bbox": [420, 320, 510, 430]
+            }
+        ],
+        "daily_detections": 31,
+        "avg_response_time": "10 min"
+    },
+    {
+        "camera_id": "CAM-005",
+        "name": "Reservorio Comunitario E",
+        "img": "cameras/Camera1.png",
+        "location": "Comunidad La Esperanza",
+        "coordinates": {"lat": -0.1656, "lng": -78.4891},
+        "description": "Monitoreo de reservorio de agua para comunidad rural, sistema de alerta temprana.",
+        "status": "online",
+        "last_update": "2025-12-17T14:31:20",
+        "water_quality": {
+            "turbidity_ntu": 2.1,
+            "temperature_c": 17.9,
+            "ph": 7.3
+        },
+        "alert_level": "low",
+        "objects_detected": [],
+        "daily_detections": 5,
+        "avg_response_time": "5 min"
+    }
+]
