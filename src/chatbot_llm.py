@@ -209,8 +209,19 @@ Rangos seguros de referencia:
             return f"Error Anthropic: {str(e)}"
     
     def get_response_openrouter(self, user_message: str) -> str:
-        """Obtiene respuesta usando OpenRouter con backoff exponencial"""
+        """Obtiene respuesta usando OpenRouter con fallback automático de modelos"""
         import time
+        
+        # Lista de modelos gratuitos en orden de preferencia
+        # Se intentarán en orden hasta encontrar uno que funcione
+        FALLBACK_MODELS = [
+            "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+            "nousresearch/hermes-3-llama-3.1-405b:free",
+            "google/gemini-2.0-flash-exp:free",
+            "qwen/qwen-2-7b-instruct:free",
+            "microsoft/phi-3-mini-128k-instruct:free",
+            "mistralai/mistral-small-3.1-24b-instruct:free",
+        ]
         
         try:
             # Construir mensajes
@@ -227,12 +238,9 @@ Rangos seguros de referencia:
             
             messages.append({"role": "user", "content": user_message})
             
-            # Backoff exponencial (mejores prácticas de OpenRouter)
-            max_retries = 3
-            base_delay = 1  # 1 segundo inicial
-            max_delay = 60  # máximo 60 segundos
-            
-            for attempt in range(max_retries):
+            # Intentar con cada modelo en la lista
+            last_error = None
+            for model_name in FALLBACK_MODELS:
                 try:
                     # Llamada a OpenRouter API (según documentación oficial)
                     response = requests.post(
@@ -240,15 +248,14 @@ Rangos seguros de referencia:
                         headers={
                             "Authorization": f"Bearer {self.api_key}",
                             "Content-Type": "application/json",
-                            "HTTP-Referer": "https://sipca-water-quality.app",  # Opcional
-                            "X-Title": "SIPCA - Water Quality Prediction",  # Opcional
+                            "HTTP-Referer": "https://sipca-water-quality.app",
+                            "X-Title": "SIPCA - Water Quality Prediction",
                         },
                         data=json.dumps({
-                            # "google/gemini-2.0-flash-exp:free" - Rate limited
-                            # Nota: Los modelos gratuitos cambian con el tiempo
-                            "model": "nousresearch/hermes-3-llama-3.1-405b:free",
+                            "model": model_name,
                             "messages": messages
                         }),
+                        timeout=30
                     )
                     
                     # Si es exitoso, retornar
@@ -256,56 +263,43 @@ Rangos seguros de referencia:
                         result = response.json()
                         return result['choices'][0]['message']['content']
                     
-                    # Si es rate limit (429), aplicar backoff exponencial
-                    if response.status_code == 429:
-                        if attempt < max_retries - 1:
-                            # Calcular delay con backoff exponencial
-                            delay = min(base_delay * (2 ** attempt), max_delay)
-                            
-                            # Intentar obtener el tiempo de retry del header
-                            retry_after = response.headers.get('Retry-After')
-                            if retry_after:
-                                try:
-                                    delay = int(retry_after)
-                                except:
-                                    pass
-                            
-                            # Mostrar mensaje de espera (solo en desarrollo)
-                            # print(f"Rate limit alcanzado. Esperando {delay}s antes de reintentar...")
-                            time.sleep(delay)
-                            continue
-                        else:
-                            return "⏳ Has excedido el límite de solicitudes. Espera unos minutos e intenta de nuevo."
+                    # Si es 404, probar siguiente modelo
+                    if response.status_code == 404:
+                        continue
                     
-                    # Otros errores HTTP
-                    response.raise_for_status()
-                
-                except requests.exceptions.HTTPError as e:
-                    if e.response.status_code == 429 and attempt < max_retries - 1:
-                        delay = min(base_delay * (2 ** attempt), max_delay)
+                    # Si es rate limit (429), esperar y reintentar con el mismo modelo
+                    if response.status_code == 429:
+                        retry_after = response.headers.get('Retry-After', '2')
+                        try:
+                            delay = min(int(retry_after), 10)
+                        except:
+                            delay = 2
                         time.sleep(delay)
                         continue
-                    raise
+                    
+                    # Otros errores, guardar y probar siguiente modelo
+                    last_error = f"HTTP {response.status_code}"
+                    continue
+                    
+                except requests.exceptions.Timeout:
+                    # Timeout, probar siguiente modelo
+                    last_error = "Timeout"
+                    continue
+                except requests.exceptions.RequestException as e:
+                    # Error de conexión, probar siguiente modelo
+                    last_error = str(e)
+                    continue
             
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
+            # Si ningún modelo funcionó, retornar mensaje amigable
+            if last_error and "429" in str(last_error):
                 return "⏳ Has excedido el límite de solicitudes. Espera unos minutos e intenta de nuevo."
-            elif e.response.status_code == 401:
-                return "🔑 Problema con la configuración. Verifica tu API key."
-            elif e.response.status_code == 402:
-                return "💳 Se han terminado los créditos. Usa un modelo gratuito."
-            elif e.response.status_code == 404:
-                return "🔍 El modelo no está disponible en este momento."
+            elif last_error and "404" in str(last_error):
+                return "🔍 Los modelos no están disponibles en este momento. Intenta más tarde."
             else:
                 return "😔 El servicio no está disponible en este momento. Intenta más tarde."
-        except requests.exceptions.Timeout:
-            return "⏱️ La solicitud tardó demasiado tiempo. Intenta de nuevo."
-        except requests.exceptions.RequestException:
-            return "🌐 Problema de conexión. Verifica tu internet e intenta de nuevo."
-        except KeyError:
-            return "😔 El modelo no está disponible en este momento."
-        except Exception as e:
-            return f"😔 El servicio no está disponible en este momento. Intenta más tarde. Error: {str(e)}"
+            
+        except Exception:
+            return "😔 El servicio no está disponible en este momento. Intenta más tarde."
     
     def chat(self, user_message: str) -> str:
         """
