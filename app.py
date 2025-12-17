@@ -642,37 +642,71 @@ def tab_vision():
             else:
                 st.warning("⚠️ No cumple con los estándares recomendados de la OMS")
             
-            # Métricas detalladas en columnas
-            st.markdown("### 📊 Análisis Detallado")
-            metric_cols = st.columns(4)
+            # Mostrar insignia de "Powered by AI"
+            if result.get('powered_by'):
+                st.caption(f"🤖 Análisis realizado con {result['powered_by']}")
             
-            with metric_cols[0]:
+            # Observaciones visuales del AI
+            st.markdown("### 👁️ Observaciones Visuales (AI)")
+            color_profile = result.get('color_profile', {})
+            
+            obs_cols = st.columns(4)
+            with obs_cols[0]:
                 st.metric(
-                    label="Brillo Promedio",
-                    value=f"{result['color_profile']['brightness']:.1f}",
-                    help="Luminosidad media de la imagen (0-255)"
+                    label="Claridad",
+                    value=color_profile.get('clarity', 'N/A')[:15],
+                    help="Evaluación de transparencia del agua"
                 )
             
-            with metric_cols[1]:
+            with obs_cols[1]:
                 st.metric(
-                    label="Saturación",
-                    value=f"{result['color_profile']['saturation']:.1f}",
-                    help="Intensidad de color promedio"
+                    label="Tinte de Color",
+                    value=color_profile.get('color_tint', 'N/A')[:15],
+                    help="Coloración observada en la muestra"
                 )
             
-            with metric_cols[2]:
+            with obs_cols[2]:
                 st.metric(
-                    label="Variabilidad",
-                    value=f"{result['color_profile']['std_dev']:.1f}",
-                    help="Desviación estándar de la imagen"
+                    label="Partículas Visibles",
+                    value=color_profile.get('visible_particles', 'N/A')[:15],
+                    help="Cantidad de partículas suspendidas"
                 )
             
-            with metric_cols[3]:
+            with obs_cols[3]:
                 st.metric(
-                    label="Índice Amarillo",
-                    value=f"{result['color_profile']['yellow_index']:.1f}",
-                    help="Componente de color amarillo/marrón"
+                    label="Transmisión de Luz",
+                    value=color_profile.get('light_transmission', 'N/A')[:15],
+                    help="Capacidad del agua para transmitir luz"
                 )
+            
+            # Insights adicionales del AI
+            if 'ai_insights' in result:
+                ai_insights = result['ai_insights']
+                
+                # Indicadores de calidad
+                st.markdown("### 🔬 Indicadores de Calidad")
+                quality_indicators = ai_insights.get('quality_indicators', {})
+                
+                ind_cols = st.columns(3)
+                with ind_cols[0]:
+                    st.info(f"**Sólidos Suspendidos:** {quality_indicators.get('suspended_solids', 'N/A')}")
+                with ind_cols[1]:
+                    st.info(f"**Presencia de Sedimento:** {quality_indicators.get('sediment_presence', 'N/A')}")
+                with ind_cols[2]:
+                    st.info(f"**Materia Orgánica:** {quality_indicators.get('organic_matter', 'N/A')}")
+                
+                # Posibles causas
+                potential_causes = ai_insights.get('potential_causes', [])
+                if potential_causes:
+                    st.markdown("### 🔍 Posibles Causas de Turbidez")
+                    for cause in potential_causes:
+                        st.markdown(f"- {cause}")
+                
+                # Notas sobre calidad de imagen
+                image_notes = ai_insights.get('image_quality_notes', '')
+                if image_notes:
+                    with st.expander("📸 Notas sobre Calidad de Imagen"):
+                        st.caption(image_notes)
             
             # Gráfico de referencia NTU
             st.markdown("### 📈 Escala de Referencia NTU")

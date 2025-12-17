@@ -57,10 +57,16 @@ La solución incluye un **dashboard interactivo desarrollado en Streamlit** que 
    ```
 
 4. **Configurar Variables de Entorno:**
-   Crea un archivo `.env` en la raíz del proyecto y añade tu token de Telegram:
+   Crea un archivo `.env` en la raíz del proyecto y añade tus credenciales:
    ```env
-   TELEGRAM_TOKEN=tu_token_aqui
+   TELEGRAM_TOKEN=tu_token_de_telegram_aqui
+   OPENAI_API_KEY=tu_api_key_de_openai_aqui
    ```
+   
+   **Notas:**
+   - Para Telegram: Obtén tu token desde [@BotFather](https://t.me/botfather)
+   - Para OpenAI: Obtén tu API key desde [platform.openai.com](https://platform.openai.com/api-keys)
+   - La funcionalidad de Análisis de Imágenes requiere OpenAI API Key
 
 5. **Ejecutar la aplicación web:**
    Al iniciar la aplicación, el **Bot de Telegram se iniciará automáticamente** en segundo plano.
