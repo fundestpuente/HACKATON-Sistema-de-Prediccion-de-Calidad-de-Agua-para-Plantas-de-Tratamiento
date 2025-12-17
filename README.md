@@ -30,15 +30,14 @@ El sistema analiza características físico-químicas críticas (pH, dureza, só
 
 ## 📸 Imágenes Destacadas del Dashboard
 
-*(Espacio reservado para capturas de pantalla del sistema)*
 
 | Dashboard Principal | Predicción y Alertas |
 |---------------------|----------------------|
-| ![Dashboard](https://via.placeholder.com/400x200?text=Dashboard+Principal) | ![Prediccion](https://via.placeholder.com/400x200?text=Prediccion+y+Alertas) |
+| ![Dashboard](/assets/img/dashboard_general.png) | ![Prediccion](/assets/img/prediccion.png) |
 
 | Asistente IA | Análisis de Visión |
 |--------------|--------------------|
-| ![Chatbot](https://via.placeholder.com/400x200?text=Asistente+IA) | ![Vision](https://via.placeholder.com/400x200?text=Vision+Module) |
+| ![Chatbot](/assets/img/asistente_ia.png) | ![Vision](/assets/img/vision_img.png) |
 
 ---
 
