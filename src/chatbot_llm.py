@@ -8,6 +8,10 @@ import json
 import requests
 from typing import List, Dict, Tuple
 import streamlit as st
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
 
 # Importaciones condicionales para cada proveedor
 try:
@@ -17,7 +21,7 @@ except ImportError:
     OPENAI_AVAILABLE = False
 
 try:
-    import google.generativeai as genai
+    from google import genai
     GOOGLE_AVAILABLE = True
 except ImportError:
     GOOGLE_AVAILABLE = False
@@ -109,10 +113,7 @@ Rangos seguros de referencia:
             self.client = openai.OpenAI(api_key=self.api_key)
             
         elif self.provider == "google" and GOOGLE_AVAILABLE:
-            genai.configure(api_key=self.api_key)
-            # Usar el nombre completo del modelo con prefijo 'models/'
-            # Esto es compatible con todas las versiones de la API
-            self.client = genai.GenerativeModel('models/gemini-pro')
+            self.client = genai.Client(api_key=self.api_key)
             
         elif self.provider == "anthropic" and ANTHROPIC_AVAILABLE:
             self.client = anthropic.Anthropic(api_key=self.api_key)
@@ -155,8 +156,8 @@ Rangos seguros de referencia:
             
             return response.choices[0].message.content
             
-        except Exception:
-            return "😔 El servicio no está disponible en este momento. Intenta más tarde."
+        except Exception as e:
+            return f"Error OpenAI: {str(e)}"
     
     def get_response_google(self, user_message: str) -> str:
         """Obtiene respuesta usando Google Gemini"""
@@ -172,12 +173,15 @@ Rangos seguros de referencia:
             full_prompt += f"Usuario: {user_message}\nAsistente:"
             
             # Llamada a la API
-            response = self.client.generate_content(full_prompt)
+            response = self.client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=full_prompt
+            )
             
             return response.text
             
-        except Exception:
-            return "😔 El servicio no está disponible en este momento. Intenta más tarde."
+        except Exception as e:
+            return f"Error Gemini: {str(e)}"
     
     def get_response_anthropic(self, user_message: str) -> str:
         """Obtiene respuesta usando Anthropic Claude"""
@@ -201,8 +205,8 @@ Rangos seguros de referencia:
             
             return response.content[0].text
             
-        except Exception:
-            return "😔 El servicio no está disponible en este momento. Intenta más tarde."
+        except Exception as e:
+            return f"Error Anthropic: {str(e)}"
     
     def get_response_openrouter(self, user_message: str) -> str:
         """Obtiene respuesta usando OpenRouter con backoff exponencial"""
@@ -305,9 +309,8 @@ Rangos seguros de referencia:
             return "🌐 Problema de conexión. Verifica tu internet e intenta de nuevo."
         except KeyError:
             return "😔 El modelo no está disponible en este momento."
-        except Exception:
-            return "😔 El servicio no está disponible en este momento. Intenta más tarde."
-
+        except Exception as e:
+            return f"😔 El servicio no está disponible en este momento. Intenta más tarde. Error: {str(e)}"
     
     def chat(self, user_message: str) -> str:
         """
