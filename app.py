@@ -9,15 +9,13 @@ import sys
 import os
 import datetime
 
-
-
 # Añadir src al path para poder importar
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from src.telegram_bot import send_telegram_alert, run_listener
 from src.vision_module import analyze_water_turbidity, get_ntu_interpretation
 from src.chatbot_llm import create_chatbot_widget
 
-#@st.cache_resource
+@st.cache_resource
 def iniciar_bot_en_background():
     """
     Esta función crea un hilo secundario para correr el bot.
@@ -30,7 +28,7 @@ def iniciar_bot_en_background():
     return bot_thread
 
 # Llamamos a la función inmediatamente
-# iniciar_bot_en_background()
+iniciar_bot_en_background()
 
 # Configuración inicial
 st.set_page_config(
