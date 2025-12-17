@@ -656,11 +656,21 @@ def create_chatbot_widget():
         transform: scale(1.05) !important;
         box-shadow: 0 6px 24px rgba(25, 118, 210, 0.5) !important;
     }
+    
+        /* Icono del chatbot flotante */
+    [data-testid="stPopover"]:not([data-testid="stSelectbox"]) button::before {
+        content: "smart_toy";
+        font-family: 'Material Symbols Outlined';
+        font-size: 28px;
+        font-weight: normal;
+        font-variation-settings: 'FILL' 1;
+        color: white;
+    }
     </style>
     """, unsafe_allow_html=True)
     
     # Widget del chatbot (sin columnas, se posiciona con CSS)
-    with st.popover("💬", help="Asistente de Calidad de Agua"):
+    with st.popover("", help="Asistente de Calidad de Agua"):
         # Verificar conexión
         if st.session_state.chatbot is None:
             # Pantalla de configuración

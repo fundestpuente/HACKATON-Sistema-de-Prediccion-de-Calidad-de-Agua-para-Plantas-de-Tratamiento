@@ -155,8 +155,6 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(12, 103, 163, 0.2);
     }
 
-    
-
     /* Ocultar menú de Streamlit y footer */
     /*
     [data-testid="stToolbar"] {
@@ -206,18 +204,6 @@ st.markdown("""
         color: var(--primary);
     }
     
-    /* 3. AI Assistant */
-    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3) p::before {
-        content: "smart_toy";
-        font-family: 'Material Symbols Outlined';
-        font-size: 20px;
-        font-weight: normal;
-        font-variation-settings: 'FILL' 0;
-    }
-    section[data-testid="stSidebar"] div[role="radiogroup"] label:nth-of-type(3):has(input:checked) p::before {
-        font-variation-settings: 'FILL' 1;
-        color: var(--primary);
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -263,7 +249,7 @@ st.sidebar.markdown("""
 st.sidebar.markdown('---')
 
 # Navegación
-options = ["Dashboard General", "Análisis de Imágenes", "Asistente de IA"]
+options = ["Dashboard General", "Análisis de Imágenes"]
 selection = st.sidebar.radio("Navegación", options, label_visibility="collapsed")
 st.sidebar.markdown('---')
 
@@ -787,16 +773,10 @@ Cumple OMS: {'Sí' if result['meets_who_standards'] else 'No'}
         </div>
         """, unsafe_allow_html=True)
 
-def tab_chatbot():
-    st.header("Asistente de IA")
-    st.caption("Haz preguntas sobre métricas de calidad del agua o recibe ayuda con el análisis.")
-    st.info("Módulo en desarrollo. Aquí se implementará el chatbot.")
 
 if selection == "Dashboard General":
     tab_dashboard()
 elif selection == "Análisis de Imágenes":
     tab_vision()
-elif selection == "Asistente de IA":
-    tab_chatbot()
 
 create_chatbot_widget()
