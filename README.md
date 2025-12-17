@@ -101,8 +101,8 @@ El sistema analiza características físico-químicas críticas (pH, dureza, só
 - Selecciona tu proveedor (OpenAI, Gemini, etc.).
 - Pregunta sobre normativas, tratamientos o interpretación de datos.
 
-### 3. Módulo de Visión (Experimental)
-- Permite analizar imágenes de muestras de agua para estimar turbidez visualmente (requiere configuración de cámara o carga de imágenes).
+### 3. Módulo de Visión
+- Permite analizar imágenes de muestras de agua para estimar turbidez visualmente (requiere carga de imágenes).
 
 
 
