@@ -230,26 +230,21 @@ Rangos seguros de referencia:
             
             for attempt in range(max_retries):
                 try:
-                    # Llamada a OpenRouter API
+                    # Llamada a OpenRouter API (según documentación oficial)
                     response = requests.post(
                         url="https://openrouter.ai/api/v1/chat/completions",
                         headers={
                             "Authorization": f"Bearer {self.api_key}",
-                            # "HTTP-Referer": "https://sipca-water-quality.app",
-                            # "X-Title": "SIPCA - Water Quality Prediction",
-                            "Content-Type": "application/json"
+                            "Content-Type": "application/json",
+                            "HTTP-Referer": "https://sipca-water-quality.app",  # Opcional
+                            "X-Title": "SIPCA - Water Quality Prediction",  # Opcional
                         },
-                        json={
-                            # Modelos gratuitos con mejores límites:
-                            # "meta-llama/llama-3.1-8b-instruct:free" - 20 RPM (RECOMENDADO)
-                            # "microsoft/phi-3-mini-128k-instruct:free" - 20 RPM
-                            # "google/gemma-2-9b-it:free" - 20 RPM
-                            "model": "meta-llama/llama-3.1-8b-instruct:free",
-                            "messages": messages,
-                            "max_tokens": 500,
-                            "temperature": 0.7
-                        },
-                        timeout=30
+                        data=json.dumps({
+                            # "google/gemini-2.0-flash-exp:free" - Rate limited
+                            # Nota: Los modelos gratuitos cambian con el tiempo
+                            "model": "nousresearch/hermes-3-llama-3.1-405b:free",
+                            "messages": messages
+                        }),
                     )
                     
                     # Si es exitoso, retornar
